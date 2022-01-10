@@ -1,5 +1,7 @@
 cmake_minimum_required (VERSION 3.11)
 
+set(CMAKE_CXX_STANDARD 20)
+
 # --- Fetch FTXUI --------------------------------------------------------------
 include(FetchContent)
 
@@ -30,13 +32,20 @@ add_library(probes
 	"include/probes/system_info.h")
 set_target_properties(probes PROPERTIES LINKER_LANGUAGE CXX)
 
+# probes library
+add_library(utils 
+	"src/utils/formatter.cpp" 
+	"include/utils/formatter.h")
+set_target_properties(utils PROPERTIES LINKER_LANGUAGE CXX)
+
 add_executable(riptop src/main.cpp)
 
 target_link_libraries(riptop
   PRIVATE probes
+  PRIVATE utils
   PRIVATE ftxui::screen
   PRIVATE ftxui::dom
   PRIVATE ftxui::component # Not needed for this example.
 )
 
-install(TARGETS riptop probes RUNTIME DESTINATION "bin")
+install(TARGETS riptop probes utils RUNTIME DESTINATION "bin")

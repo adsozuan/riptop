@@ -1,4 +1,31 @@
 # Defines the Chromium style for automatic reformatting.
 # http://clang.llvm.org/docs/ClangFormatStyleOptions.html
-BasedOnStyle: Chromium
-Standard: Cpp11
+
+---
+BasedOnStyle: Microsoft
+Language: 'Cpp'
+Standard: 'c++17'
+ColumnLimit: '120'
+
+AlignAfterOpenBracket: 'Align'
+AlignConsecutiveMacros: 'true'
+AlignConsecutiveAssignments: 'true'
+AlignConsecutiveDeclarations: 'true'
+AlignTrailingComments: 'true'
+
+
+AlwaysBreakTemplateDeclarations: 'Yes'
+
+IndentCaseLabels: 'true'
+
+NamespaceIndentation : 'All'
+
+
+
+PointerAlignment: 'Left'
+SortIncludes: 'true'
+SortUsingDeclarations: 'true'
+
+SpaceBeforeCpp11BracedList: 'true'
+UseTab: 'Never'
+

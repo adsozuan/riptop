@@ -1,16 +1,16 @@
 #pragma once
+
 #include <windows.h>
+
 #include <cstdint>
 
-constexpr auto to_mega_bytes(int64_t x) {
-  return x / 1048576;
-}
 
+namespace riptop {
 
 class MemoryUsageInfo {
  public:
   MemoryUsageInfo();
-  void  Update();
+  void Update();
 
   int64_t total_memory() { return total_memory_; }
   int64_t total_memory_GB() { return total_memory_ / 1000; }
@@ -31,3 +31,4 @@ class MemoryUsageInfo {
   int64_t used_page_memory_{0};
   double used_page_memory_percentage_{0};
 };
+}  // namespace riptop
