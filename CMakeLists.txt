@@ -22,13 +22,21 @@ project(riptop
   VERSION 1.0.0
 )
 
+# probes library
+add_library(probes 
+	"src/probes/memory_usage_info.cpp"
+	"src/probes/system_info.cpp"
+	"include/probes/memory_usage_info.h"
+	"include/probes/system_info.h")
+set_target_properties(probes PROPERTIES LINKER_LANGUAGE CXX)
+
 add_executable(riptop src/main.cpp)
-target_include_directories(riptop PRIVATE src)
 
 target_link_libraries(riptop
+  PRIVATE probes
   PRIVATE ftxui::screen
   PRIVATE ftxui::dom
   PRIVATE ftxui::component # Not needed for this example.
 )
 
-install(TARGETS riptop RUNTIME DESTINATION "bin")
+install(TARGETS riptop probes RUNTIME DESTINATION "bin")

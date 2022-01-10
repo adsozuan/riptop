@@ -1,42 +1,13 @@
-#include <windows.h>
+
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 
+#include "../include/probes/memory_usage_info.h"
 #include "ftxui/dom/elements.hpp"
 #include "ftxui/dom/table.hpp"
 #include "ftxui/screen/screen.hpp"
 #include "ftxui/screen/string.hpp"
-
-constexpr auto to_mega_bytes(int64_t x) {
-  return x / 1048576;
-}
-class MemoryUsageInfo {
- public:
-  MemoryUsageInfo() {
-    memory_info_.dwLength = sizeof(MEMORYSTATUSEX);
-    Update();
-  };
-
-  int64_t total_memory() { return total_memory_; }
-  int64_t total_memory_GB() { return total_memory_ / 1000; }
-  int64_t used_memory() { return used_memory_; }
-  double used_memory_percentage() { return used_memory_percentage_; }
-
-  void Update() {
-    GlobalMemoryStatusEx(&memory_info_);
-    total_memory_ = to_mega_bytes(memory_info_.ullTotalPhys);
-    used_memory_ =
-        to_mega_bytes(memory_info_.ullTotalPhys - memory_info_.ullAvailPhys);
-    used_memory_percentage_ = (double)used_memory_ / (double)total_memory_;
-  }
-
- private:
-  MEMORYSTATUSEX memory_info_;
-  int64_t total_memory_{0};
-  int64_t used_memory_{0};
-  double used_memory_percentage_{0};
-};
 
 int main(void) {
   using namespace ftxui;
@@ -74,13 +45,16 @@ int main(void) {
         hbox({vbox({
                   usage_gauge("CPU", 0.12),
                   usage_gauge("MEM", mem_info.used_memory_percentage()),
+                  usage_gauge("PGE", mem_info.used_page_memory_percentage()),
               }) | flex,
-              vbox({separator(), separator()}),
+              vbox({separator(), separator(), separator()}),
               vbox({
                   hbox(text("Tasks: ") | color(Color::Cyan3),
                        text("290 total, 5 running")),
                   hbox(text("Size: ") | color(Color::Cyan3),
                        text(total_mem_stream.str()), text("GB")),
+                  hbox(text("Updatime: ") | color(Color::Cyan3),
+                       text("18:02:23:15")),
               }) | flex});
     return content;
   };
@@ -118,27 +92,6 @@ int main(void) {
   Render(screen, document);
 
   std::cout << screen.ToString() << std::endl;
-
-  SYSTEM_INFO siSysInfo;
-
-  // Copy the hardware information to the SYSTEM_INFO structure.
-
-  GetSystemInfo(&siSysInfo);
-
-  // Display the contents of the SYSTEM_INFO structure.
-
-  printf("Hardware information: \n");
-  printf("  OEM ID: %u\n", siSysInfo.dwOemId);
-  printf("  Number of processors: %u\n", siSysInfo.dwNumberOfProcessors);
-  printf("  Page size: %u\n", siSysInfo.dwPageSize);
-  printf("  Processor type: %u\n", siSysInfo.dwProcessorType);
-  printf("  Minimum application address: %lx\n",
-         siSysInfo.lpMinimumApplicationAddress);
-  printf("  Maximum application address: %lx\n",
-         siSysInfo.lpMaximumApplicationAddress);
-  printf("  Active processor mask: %u\n", siSysInfo.dwActiveProcessorMask);
-  printf("  Uptime: %d\n", GetTickCount64());
-
 
   return EXIT_SUCCESS;
 }
