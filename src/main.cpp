@@ -17,7 +17,6 @@ int main(void)
     using namespace ftxui;
     using namespace riptop;
 
-    auto t       = format_memory(10);
     auto summary = [&] {
         auto content = vbox({
             hbox({text(L"- done:   "), text(L"3") | bold}) | color(Color::Green),

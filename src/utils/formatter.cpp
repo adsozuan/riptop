@@ -1,20 +1,19 @@
 
 #include "../../include/utils/formatter.h"
 
-#include <sstream>
 #include <cstdint>
+#include <sstream>
 
-
-const unsigned long BYTE     = 1;
-const unsigned long KILOBYTE = 1024;
-const unsigned long MEGABYTE = KILOBYTE * KILOBYTE;
-const unsigned long GIGABYTE = MEGABYTE * KILOBYTE;
-const unsigned long long TERABYTE = 1024ULL * GIGABYTE;
+const int64_t BYTE     = 1;
+const int64_t KILOBYTE = 1024;
+const int64_t MEGABYTE = KILOBYTE * KILOBYTE;
+const int64_t GIGABYTE = MEGABYTE * KILOBYTE;
+const int64_t TERABYTE = 1024ULL * GIGABYTE;
 
 std::string riptop::format_memory(int64_t memory)
 {
     std::ostringstream oss;
-    double             value;
+    int64_t            value;
 
     if (memory < MEGABYTE)
     {
