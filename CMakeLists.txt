@@ -6,7 +6,8 @@ set(CMAKE_CXX_STANDARD 20)
 include(FetchContent)
 
 set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
-FetchContent_Declare(ftxui
+FetchContent_Declare(
+  ftxui
   GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
   GIT_TAG v0.11
 )
@@ -49,3 +50,12 @@ target_link_libraries(riptop
 )
 
 install(TARGETS riptop probes utils RUNTIME DESTINATION "bin")
+
+option(ENABLE_TESTING "Enable Test Builds" ON)
+
+if(ENABLE_TESTING)
+  enable_testing()
+  message("Building Tests. Be sure to check out test/constexpr_tests for constexpr testing")
+  add_subdirectory(test)
+endif()
+
