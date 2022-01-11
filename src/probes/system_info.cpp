@@ -23,7 +23,7 @@ void SystemInfo::Update()
 std::string SystemInfo::GetUptime()
 {
     auto uptime = std::chrono::milliseconds(GetTickCount64());
-    return std::format("{:%H:%M:%S}", uptime);
+    return std::format("{:%H:%M:%S}", std::chrono::duration_cast<std::chrono::seconds>(uptime));
 }
 
 void riptop::SystemInfo::UpdateCpuCount()
