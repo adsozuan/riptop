@@ -33,23 +33,32 @@ add_library(probes
 	"include/probes/system_info.h")
 set_target_properties(probes PROPERTIES LINKER_LANGUAGE CXX)
 
-# probes library
+# utils library
 add_library(utils 
 	"src/utils/formatter.cpp" 
 	"include/utils/formatter.h")
 set_target_properties(utils PROPERTIES LINKER_LANGUAGE CXX)
+
+# ui library
+add_library(ui 
+	"src/ui/main_ui.cpp" 
+	"include/ui/main_ui.h")
+target_link_libraries(ui
+  PRIVATE ftxui::screen
+  PRIVATE ftxui::dom
+  PRIVATE ftxui::component # Not needed for this example.
+)
+set_target_properties(ui PROPERTIES LINKER_LANGUAGE CXX)
 
 add_executable(riptop src/main.cpp)
 
 target_link_libraries(riptop
   PRIVATE probes
   PRIVATE utils
-  PRIVATE ftxui::screen
-  PRIVATE ftxui::dom
-  PRIVATE ftxui::component # Not needed for this example.
+  PRIVATE ui
 )
 
-install(TARGETS riptop probes utils RUNTIME DESTINATION "bin")
+install(TARGETS riptop probes utils ui RUNTIME DESTINATION "bin")
 
 option(ENABLE_TESTING "Enable Test Builds" ON)
 

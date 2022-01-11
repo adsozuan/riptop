@@ -26,7 +26,7 @@ include(CTest)
 add_library(catch_main STATIC catch_main.cpp)
 target_link_libraries(catch_main PUBLIC Catch2::Catch2)
 
-add_executable(riptop_test "test_utils.cpp")
+add_executable(riptop_test "test_utils.cpp" "test_probes.cpp")
 target_link_libraries(riptop_test PRIVATE catch_main utils)
 
 
