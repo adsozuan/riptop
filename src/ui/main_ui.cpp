@@ -1,6 +1,7 @@
 #include "../../include/ui/main_ui.h"
 #include "../../include/probes/memory_usage_info.h"
 #include "../../include/probes/system_info.h"
+#include "../../include/probes/system_times.h"
 #include "../../include/utils/formatter.h"
 
 #include "ftxui/component/screen_interactive.hpp"
@@ -37,10 +38,12 @@ void RenderMainUi()
         total_mem_stream << std::setprecision(3) << total_mem;
 
         SystemInfo system_info;
+        SystemTimes system_times;
+        system_times.UpdateCpuUsage();
 
         auto content =
             hbox({vbox({
-                      usage_gauge("CPU", 0.12f),
+                      usage_gauge("CPU", static_cast<float>(system_times.cpu_usage())),
                       usage_gauge("MEM", static_cast<float>(mem_info.used_memory_percentage())),
                       usage_gauge("PGE", static_cast<float>(mem_info.used_page_memory_percentage())),
                   }) | flex,

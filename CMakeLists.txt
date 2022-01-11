@@ -30,7 +30,7 @@ add_library(probes
 	"src/probes/memory_usage_info.cpp"
 	"src/probes/system_info.cpp"
 	"include/probes/memory_usage_info.h"
-	"include/probes/system_info.h")
+	"include/probes/system_info.h" "include/probes/system_times.h" "src/probes/system_times.cpp")
 set_target_properties(probes PROPERTIES LINKER_LANGUAGE CXX)
 
 # utils library
