@@ -15,6 +15,10 @@ class SystemInfo {
   std::string processor_name() { return processor_name_; }
 
  private:
+  void UpdateCpuCount();
+  void UpdateProcessorName();
+
+ private:
   int64_t cpu_core_count_{0};
   std::string processor_name_;
 };

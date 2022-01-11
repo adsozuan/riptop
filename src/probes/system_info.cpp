@@ -16,12 +16,27 @@ SystemInfo::SystemInfo()
 
 void SystemInfo::Update()
 {
+    UpdateCpuCount();
+    UpdateProcessorName();
+}
+
+std::string SystemInfo::GetUptime()
+{
+    auto uptime = std::chrono::milliseconds(GetTickCount64());
+    return std::format("{:%H:%M:%S}", uptime);
+}
+
+void riptop::SystemInfo::UpdateCpuCount()
+{
     SYSTEM_INFO system_info;
     GetSystemInfo(&system_info);
     cpu_core_count_ = system_info.dwNumberOfProcessors;
-    static TCHAR cpu_name[256];
+}
 
-    HKEY key;
+void riptop::SystemInfo::UpdateProcessorName()
+{
+    static TCHAR cpu_name[256] {};
+    HKEY         key;
     if (SUCCEEDED(RegOpenKey(HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0\\", &key)))
     {
         DWORD count = 256;
@@ -31,10 +46,4 @@ void SystemInfo::Update()
         }
     }
     processor_name_ = cpu_name;
-}
-
-std::string SystemInfo::GetUptime()
-{
-    auto uptime = std::chrono::milliseconds(GetTickCount64());
-    return std::format("{:%H:%M:%S}", uptime);
 }
