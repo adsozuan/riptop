@@ -22,13 +22,12 @@ FetchContent_Declare(
 find_package(Catch2 REQUIRED)
 
 include(CTest)
-#include(Catch)
 
 add_library(catch_main STATIC catch_main.cpp)
 target_link_libraries(catch_main PUBLIC Catch2::Catch2)
 
 add_executable(riptop_test "test_utils.cpp")
-target_link_libraries(riptop_test PRIVATE catch_main)
+target_link_libraries(riptop_test PRIVATE catch_main utils)
 
 
 

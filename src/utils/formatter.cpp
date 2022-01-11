@@ -1,39 +1,40 @@
 
 #include "../../include/utils/formatter.h"
 
+#include <cmath>
 #include <cstdint>
 #include <sstream>
-
-const int64_t BYTE     = 1;
-const int64_t KILOBYTE = 1024;
-const int64_t MEGABYTE = KILOBYTE * KILOBYTE;
-const int64_t GIGABYTE = MEGABYTE * KILOBYTE;
-const int64_t TERABYTE = 1024ULL * GIGABYTE;
 
 std::string riptop::format_memory(int64_t memory)
 {
     std::ostringstream oss;
-    int64_t            value;
+    double             memory_decimal = static_cast<double>(memory);
+    double             value {0.0};
 
     if (memory < MEGABYTE)
     {
-        value = memory / KILOBYTE;
+        value = std::ceil(memory_decimal / KILOBYTE);
         oss << value << "KB";
     }
     else if (memory < GIGABYTE)
     {
-        value = memory / MEGABYTE;
+        value = std::ceil(memory_decimal / MEGABYTE);
         oss << value << "MB";
     }
     else if (memory < TERABYTE)
     {
-        value = memory / GIGABYTE;
+        value = std::round(memory_decimal / GIGABYTE);
         oss << value << "GB";
+    }
+    else if (memory < PETABYTE)
+    {
+        value = std::round(memory_decimal / TERABYTE);
+        oss << value << "TB";
     }
     else
     {
-        value = memory / TERABYTE;
-        oss << value << "TB";
+        value = std::round(memory_decimal / PETABYTE);
+        oss << value << "PB";
     }
 
     return oss.str();
