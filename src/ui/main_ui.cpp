@@ -11,7 +11,6 @@
 #include "ftxui/screen/string.hpp"
 #include <ftxui/component/component.hpp>
 
-
 void RenderMainUi()
 {
     using namespace ftxui;
@@ -25,34 +24,42 @@ void RenderMainUi()
     auto usage_gauge = [&](std::string name, float value) {
         std::ostringstream value_stream;
         value_stream << std::setprecision(3) << value * 100;
-        auto content =
-            hbox(text(name) | color(Color::Cyan3), text("["), gauge(value) | color(Color::Green) | flex,
-                 text(value_stream.str()) | color(Color::GrayDark), text("%") | color(Color::GrayDark), text("]"));
+        auto content = hbox(text(name) | color(Color::Cyan3), text("["), gauge(value) | color(Color::Green) | flex,
+                            text(value_stream.str()) | color(Color::GrayDark), text("%") | color(Color::GrayDark),
+                            text("]") | size(WIDTH, EQUAL, 5));
         return content;
     };
 
-    auto global_usage = Renderer([&] {
-        MemoryUsageInfo    mem_info;
-        auto               total_mem = mem_info.total_memory_GB();
-        std::ostringstream total_mem_stream;
-        total_mem_stream << std::setprecision(3) << total_mem;
-
-        SystemInfo system_info;
+    auto usage_gauges_area = [&](const MemoryUsageInfo& mem_info) {
         SystemTimes system_times;
         system_times.UpdateCpuUsage();
 
-        auto content =
-            hbox({vbox({
-                      usage_gauge("CPU", static_cast<float>(system_times.cpu_usage())),
-                      usage_gauge("MEM", static_cast<float>(mem_info.used_memory_percentage())),
-                      usage_gauge("PGE", static_cast<float>(mem_info.used_page_memory_percentage())),
-                  }) | flex,
-                  vbox({separator(), separator(), separator()}),
-                  vbox({
-                      hbox(text("Tasks: ") | color(Color::Cyan3), text("290 total, 5 running")),
-                      hbox(text("Size: ") | color(Color::Cyan3), text(format_memory(mem_info.total_memory()))),
-                      hbox(text("Updatime: ") | color(Color::Cyan3), text(system_info.GetUptime())),
-                  }) | flex});
+        return vbox({
+            usage_gauge("CPU", static_cast<float>(system_times.cpu_usage())),
+            usage_gauge("MEM", static_cast<float>(mem_info.used_memory_percentage())),
+            usage_gauge("PGE", static_cast<float>(mem_info.used_page_memory_percentage())),
+        });
+    };
+
+    auto system_info_area = [&](const MemoryUsageInfo& mem_info) {
+        SystemInfo system_info;
+
+        return vbox({
+            hbox(text("Tasks: ") | color(Color::Cyan3), text("290 total, 5 running")),
+            hbox(text("Size: ") | color(Color::Cyan3), text(format_memory(mem_info.total_memory()))),
+            hbox(text("Uptime: ") | color(Color::Cyan3), text(system_info.GetUptime())),
+        });
+    };
+
+    auto global_usage = Renderer([&] {
+        MemoryUsageInfo mem_info;
+
+        auto content = hbox(
+            {
+                usage_gauges_area(mem_info), 
+                vbox({separator(), separator(), separator()}), 
+                system_info_area(mem_info)
+            });
         return content;
     });
 
@@ -75,8 +82,7 @@ void RenderMainUi()
     content.DecorateCellsAlternateRow(color(Color::Cyan), 2, 0);
     content.DecorateCellsAlternateRow(color(Color::White), 2, 1);
 
-    
-
+    auto process_table_renderer = Renderer([&] { return vbox({center(process_table.Render())}); });
     // auto document = //
     //    vbox({title(), separator(), global_usage(), separator(), vbox({center(process_table.Render()),
     //    separator()})});
@@ -86,13 +92,12 @@ void RenderMainUi()
 
     auto screen = ScreenInteractive::FitComponent();
 
-    auto component = Renderer([&] {
+    auto renderer = Renderer([&] {
         return vbox({
-                   title->Render(),
-                   separator(),
-                   global_usage->Render(),
+                   title->Render(), separator(), global_usage->Render(), separator(),
+                    //process_table_renderer->Render()
                }) |
-               xflex | size(WIDTH, GREATER_THAN, 40) | border;
+               size(WIDTH, GREATER_THAN, 80) | border;
     });
 
     int shift {0};
@@ -102,13 +107,13 @@ void RenderMainUi()
         while (refresh_ui_continue)
         {
             using namespace std::chrono_literals;
-            std::this_thread::sleep_for(0.200s);
+            std::this_thread::sleep_for(500ms);
             shift++;
             screen.PostEvent(Event::Custom);
         }
     });
 
-    screen.Loop(component);
+    screen.Loop(renderer);
     refresh_ui_continue = false;
     refresh_ui.join();
 }
