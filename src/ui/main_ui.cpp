@@ -66,6 +66,10 @@ void RenderMainUi()
             {"25460", "ad", "4", "03.1%", "120.3 MB", "29", "0.0 MB/s", "00:01:30:39", "firefox.exe"},
             {"25348", "ad", "8", "13.1%", "320.4 MB", "19", "0.0 MB/s", "00:01:40:11", "chrome.exe"},
             {"25148", "ad", "4", "01.1%", "20.3 MB", "9", "0.0 MB/s", "00:01:45:11", "jezibella.exe"},
+            {"25148", "ad", "4", "01.1%", "20.3 MB", "9", "0.0 MB/s", "00:01:45:11", "jezibella.exe"},
+            {"25148", "ad", "4", "01.1%", "20.3 MB", "9", "0.0 MB/s", "00:01:45:11", "jezibella.exe"},
+            {"25148", "ad", "4", "01.1%", "20.3 MB", "9", "0.0 MB/s", "00:01:45:11", "jezibella.exe"},
+            {"25148", "ad", "4", "01.1%", "20.3 MB", "9", "0.0 MB/s", "00:01:45:11", "jezibella.exe"},
             {"25111", "adnotnumber", "4", "11.1%", "20.3 MB", "4", "11.0 MB/s", "00:01:58:57",
              "wonderful_long_application.exe"},
         });
@@ -90,8 +94,7 @@ void RenderMainUi()
                size(WIDTH, GREATER_THAN, 80) | border;
     });
 
-    int shift {0};
-
+    int         shift {0};
     bool        refresh_ui_continue = true;
     std::thread refresh_ui([&] {
         while (refresh_ui_continue)
