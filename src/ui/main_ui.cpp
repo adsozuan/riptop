@@ -17,7 +17,7 @@
 void ProcessListToTable(std::vector<std::vector<std::string>>& outputs,
                                                          const std::vector<Process>&            processes)
 {
-    int line_number = 0;
+    int line_number = 1; // 0 is allocated to column header
     for (auto& process : processes)
     {
         auto& line = outputs[line_number];
@@ -40,8 +40,8 @@ void RenderMainUi()
     using namespace ftxui;
     using namespace riptop;
 
-    std::vector<std::vector<std::string>> outputs(64, std::vector<std::string>(9, ""));
-    outputs.push_back({"ID", "USER", "PRI", "CPU%", "MEM", "THREAD", "DISK", "TIME", "PROCESS"});
+    std::vector<std::vector<std::string>> outputs(65, std::vector<std::string>(9, ""));
+    outputs[0] = {"ID", "USER", "PRI", "CPU%", "MEM", "THREAD", "DISK", "TIME", "PROCESS"};
 
     auto title = Renderer([&] {
         auto content = vbox(text("riptop") | hcenter) | bgcolor(Color::Blue);
