@@ -1,5 +1,6 @@
 #include "../../include/ui/main_ui.h"
 #include "../../include/probes/memory_usage_info.h"
+#include "../../include/probes/process_list.h"
 #include "../../include/probes/system_info.h"
 #include "../../include/probes/system_times.h"
 #include "../../include/utils/formatter.h"
@@ -11,10 +12,36 @@
 #include "ftxui/screen/string.hpp"
 #include <ftxui/component/component.hpp>
 
+#include <format>
+
+void ProcessListToTable(std::vector<std::vector<std::string>>& outputs,
+                                                         const std::vector<Process>&            processes)
+{
+    int line_number = 0;
+    for (auto& process : processes)
+    {
+        auto& line = outputs[line_number];
+        line[0]    = std::format("{:d}", process.id);
+        line[1]    = std::format("{}", process.user_name);
+        line[2]    = std::format("{:d}", process.base_priority);
+        line[3]    = std::format("{:g}%", process.percent_processor_time);
+        line[4]    = std::format("{:d} MB", process.used_memory);
+        line[5]    = std::format("{:d} MB/s", process.disk_usage);
+        line[6] =
+            std::format("{:%H:%M:%S}",
+                        std::chrono::duration_cast<std::chrono::seconds>(std::chrono::milliseconds(process.up_time)));
+        line[7] = std::format("{}", process.exe_name);
+        line_number++;
+    }
+}
+
 void RenderMainUi()
 {
     using namespace ftxui;
     using namespace riptop;
+
+    std::vector<std::vector<std::string>> outputs(64, std::vector<std::string>(9, ""));
+    outputs.push_back({"ID", "USER", "PRI", "CPU%", "MEM", "THREAD", "DISK", "TIME", "PROCESS"});
 
     auto title = Renderer([&] {
         auto content = vbox(text("riptop") | hcenter) | bgcolor(Color::Blue);
@@ -61,18 +88,12 @@ void RenderMainUi()
     });
 
     auto process_table_renderer = Renderer([&] {
-        auto process_table = Table({
-            {"ID", "USER", "PRI", "CPU%", "MEM", "THREAD", "DISK", "TIME", "PROCESS"},
-            {"25460", "ad", "4", "03.1%", "120.3 MB", "29", "0.0 MB/s", "00:01:30:39", "firefox.exe"},
-            {"25348", "ad", "8", "13.1%", "320.4 MB", "19", "0.0 MB/s", "00:01:40:11", "chrome.exe"},
-            {"25148", "ad", "4", "01.1%", "20.3 MB", "9", "0.0 MB/s", "00:01:45:11", "jezibella.exe"},
-            {"25148", "ad", "4", "01.1%", "20.3 MB", "9", "0.0 MB/s", "00:01:45:11", "jezibella.exe"},
-            {"25148", "ad", "4", "01.1%", "20.3 MB", "9", "0.0 MB/s", "00:01:45:11", "jezibella.exe"},
-            {"25148", "ad", "4", "01.1%", "20.3 MB", "9", "0.0 MB/s", "00:01:45:11", "jezibella.exe"},
-            {"25148", "ad", "4", "01.1%", "20.3 MB", "9", "0.0 MB/s", "00:01:45:11", "jezibella.exe"},
-            {"25111", "adnotnumber", "4", "11.1%", "20.3 MB", "4", "11.0 MB/s", "00:01:58:57",
-             "wonderful_long_application.exe"},
-        });
+        ProcessList process_list;
+
+        process_list.UpdateProcessList(100);
+
+        ProcessListToTable(outputs, process_list.processes());
+        auto process_table = Table(outputs);
 
         process_table.SelectColumns(0, 7).DecorateCells(align_right);
         process_table.SelectCell(0, 0).DecorateCells(bgcolor(Color::CyanLight));
@@ -106,7 +127,12 @@ void RenderMainUi()
         }
     });
 
+    std::thread process_list_update([&] {
+
+    });
+
     screen.Loop(renderer);
     refresh_ui_continue = false;
     refresh_ui.join();
+    process_list_update.join();
 }
