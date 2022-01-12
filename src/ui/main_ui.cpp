@@ -26,11 +26,12 @@ void ProcessListToTable(std::vector<std::vector<std::string>>& outputs,
         line[2]    = std::format("{:d}", process.base_priority);
         line[3]    = std::format("{:g}%", process.percent_processor_time);
         line[4]    = std::format("{:d} MB", process.used_memory);
-        line[5]    = std::format("{:d} MB/s", process.disk_usage);
-        line[6] =
+        line[5]    = std::format("{:d}", process.thread_count);
+        line[6]    = std::format("{:d} MB/s", process.disk_usage);
+        line[7] =
             std::format("{:%H:%M:%S}",
                         std::chrono::duration_cast<std::chrono::seconds>(std::chrono::milliseconds(process.up_time)));
-        line[7] = std::format("{}", process.exe_name);
+        line[8] = std::format("{}", process.exe_name);
         line_number++;
     }
 }
