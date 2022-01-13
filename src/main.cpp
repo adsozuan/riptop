@@ -3,7 +3,6 @@
 
 int main(void)
 {
-
     RenderMainUi();
     return 0;
 }

@@ -10,9 +10,11 @@
 #include "ftxui/dom/table.hpp"
 #include "ftxui/screen/screen.hpp"
 #include "ftxui/screen/string.hpp"
-#include <ftxui/component/component.hpp>
+#include "ftxui/component/component.hpp"
 
 #include <format>
+
+// clang-format off
 
 void ProcessListToTable(std::vector<std::vector<std::string>>& outputs, const std::vector<Process>& processes)
 {
@@ -40,8 +42,6 @@ void RenderMainUi()
     using namespace ftxui;
     using namespace riptop;
 
-    std::vector<std::vector<std::string>> outputs(65, std::vector<std::string>(9, ""));
-    outputs[0] = {"ID", "USER", "PRI", "CPU%", "MEM", "THREAD", "DISK", "TIME", "PROCESS"};
 
     auto title = Renderer([&] {
         auto content = vbox(text("riptop") | hcenter) | bgcolor(Color::Blue);
@@ -65,16 +65,15 @@ void RenderMainUi()
                    usage_gauge("CPU", static_cast<float>(system_times.cpu_usage())),
                    usage_gauge("MEM", static_cast<float>(mem_info.used_memory_percentage())),
                    usage_gauge("PGE", static_cast<float>(mem_info.used_page_memory_percentage())),
-               }) |
-               notflex;
+               });
     };
 
     auto system_info_area = [&](const MemoryUsageInfo& mem_info) {
         SystemInfo system_info;
 
         return vbox({
-            hbox(text("Tasks: ") | color(Color::Cyan3), text("290 total, 5 running")),
-            hbox(text("Size: ") | color(Color::Cyan3), text(format_memory(mem_info.total_memory()))),
+            hbox(text("Tasks: ")  | color(Color::Cyan3), text("290 total, 5 running")),
+            hbox(text("Size: ")   | color(Color::Cyan3), text(format_memory(mem_info.total_memory()))),
             hbox(text("Uptime: ") | color(Color::Cyan3), text(system_info.GetUptime())),
         });
     };
@@ -87,11 +86,11 @@ void RenderMainUi()
         return content;
     });
 
+    std::vector<std::vector<std::string>> outputs(65, std::vector<std::string>(9, ""));
+    outputs[0] = {"PID", "USER", "PRI", "CPU%", "MEM", "THREAD", "DISK", "TIME", "PROCESS"};
     auto process_table_renderer = Renderer([&] {
         ProcessList process_list;
-
         process_list.UpdateProcessList(100);
-
         ProcessListToTable(outputs, process_list.processes());
         auto process_table = Table(outputs);
 
@@ -104,15 +103,20 @@ void RenderMainUi()
         auto content = process_table.SelectRows(1, -1);
         content.DecorateCellsAlternateRow(color(Color::Cyan), 2, 0);
         content.DecorateCellsAlternateRow(color(Color::White), 2, 1);
-        return vbox({process_table.Render() | vscroll_indicator | frame});
+        return vbox({process_table.Render() | vscroll_indicator | frame | border });
     });
 
     auto screen = ScreenInteractive::FitComponent();
 
     auto renderer = Renderer([&] {
-        return vbox({title->Render(), separator(), global_usage->Render(), separator(),
-                     process_table_renderer->Render()}) |
-               size(WIDTH, GREATER_THAN, 80) | border;
+        return vbox({
+                     title->Render(), 
+                     separator(), 
+                     global_usage->Render(), 
+                     separator(),
+                     process_table_renderer->Render()
+            }) |
+               size(WIDTH, GREATER_THAN, 80);
     });
 
     int         shift {0};
@@ -127,11 +131,9 @@ void RenderMainUi()
         }
     });
 
-    std::thread process_list_update([&] {
-    });
-
     screen.Loop(renderer);
     refresh_ui_continue = false;
     refresh_ui.join();
-    process_list_update.join();
 }
+
+// clang-format on 

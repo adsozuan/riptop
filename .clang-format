@@ -23,7 +23,7 @@ NamespaceIndentation : 'All'
 
 
 PointerAlignment: 'Left'
-SortIncludes: 'true'
+SortIncludes: 'False'
 SortUsingDeclarations: 'true'
 
 SpaceBeforeCpp11BracedList: 'true'
