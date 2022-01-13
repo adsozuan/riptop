@@ -52,10 +52,10 @@ void RenderMainUi()
         
         ftxui::Color::Palette256 gauge_color = Color::Green1;
 
-        if (value > 0.5 && value < 0.75) {
+        if (value > 0.5 ) {
             gauge_color = Color::Orange1;
         }
-        else 
+        else if (value > 0.75)
         {
              gauge_color = Color::Red1;
         }
@@ -73,8 +73,9 @@ void RenderMainUi()
                    usage_gauge("CPU", static_cast<float>(system_times.cpu_usage())),
                    usage_gauge("MEM", static_cast<float>(mem_info.used_memory_percentage())),
                    usage_gauge("PGE", static_cast<float>(mem_info.used_page_memory_percentage())),
-               });
+               }) | flex;
     };
+    
 
     auto system_info_area = [&](const MemoryUsageInfo& mem_info) {
         SystemInfo system_info;
@@ -83,14 +84,20 @@ void RenderMainUi()
             hbox(text("Tasks: ")  | color(Color::Cyan3), text("290 total, 5 running")),
             hbox(text("Size: ")   | color(Color::Cyan3), text(format_memory(mem_info.total_memory()))),
             hbox(text("Uptime: ") | color(Color::Cyan3), text(system_info.GetUptime())),
-        });
+            hbox(text("Proc: ")   | color(Color::Cyan3), text(system_info.processor_name())),
+        }) | flex;
     };
+    
+
 
     auto global_usage = Renderer([&] {
         MemoryUsageInfo mem_info;
 
-        auto content = hbox(
-            {usage_gauges_area(mem_info), vbox({separator(), separator(), separator()}), system_info_area(mem_info)});
+        auto content = hbox({
+            usage_gauges_area(mem_info), 
+            filler(),
+            system_info_area(mem_info)
+            }) ;
         return content;
     });
 
