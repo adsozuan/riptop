@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <thread>
 
-void SystemTimes::UpdateCpuUsage()
+void riptop::SystemTimes::UpdateCpuUsage()
 {
     using namespace std::chrono_literals;
 
@@ -25,7 +25,7 @@ void SystemTimes::UpdateCpuUsage()
     }
 }
 
-uint64_t SystemTimes::SubtractTimes(const FILETIME* a, const FILETIME* b)
+uint64_t riptop::SystemTimes::SubtractTimes(const FILETIME* a, const FILETIME* b)
 {
     LARGE_INTEGER la {};
     LARGE_INTEGER lb {};

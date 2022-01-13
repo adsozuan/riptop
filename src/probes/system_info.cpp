@@ -9,10 +9,7 @@
 
 using namespace riptop;
 
-SystemInfo::SystemInfo()
-{
-    Update();
-}
+SystemInfo::SystemInfo() { Update(); }
 
 void SystemInfo::Update()
 {
@@ -55,5 +52,4 @@ void riptop::SystemInfo::UpdateComputerName()
     DWORD        size = 16;
     GetComputerName(computer_name, &size);
     computer_name_ = computer_name;
-
 }

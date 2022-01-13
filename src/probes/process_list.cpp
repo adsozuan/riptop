@@ -5,16 +5,16 @@
 #include <tchar.h>
 #include <tlhelp32.h>
 
-ProcessList::ProcessList()
+riptop::ProcessList::ProcessList()
 {
     processes_.reserve(64);
 }
 
-void ProcessList::SortProcessList()
+void riptop::ProcessList::SortProcessList()
 {
 }
 
-bool ProcessList::UpdateProcessList(size_t update_interval_s)
+bool riptop::ProcessList::UpdateProcessList(size_t update_interval_s)
 {
     HANDLE         process_snap;
     PROCESSENTRY32 process_entry {};
@@ -70,7 +70,7 @@ bool ProcessList::UpdateProcessList(size_t update_interval_s)
     return (TRUE);
 }
 
-void print_error(std::string msg)
+void riptop::print_error(std::string msg)
 {
     DWORD  eNum;
     TCHAR  sysMsg[256];

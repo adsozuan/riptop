@@ -45,7 +45,6 @@ void RenderMainUi()
 {
 
     SystemInfo system_info;
-
     auto title = Renderer([&] {
         auto title_value = std::format("riptop on {}", system_info.computer_name());
         auto content = hbox(text(title_value)) | hcenter | bgcolor(Color::Blue);
