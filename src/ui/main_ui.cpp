@@ -16,6 +16,9 @@
 
 // clang-format off
 
+using namespace ftxui;
+using namespace riptop;
+
 void ProcessListToTable(std::vector<std::vector<std::string>>& outputs, const std::vector<Process>& processes)
 {
     int line_number = 1; // 0 is allocated to column header
@@ -37,17 +40,16 @@ void ProcessListToTable(std::vector<std::vector<std::string>>& outputs, const st
     }
 }
 
+
 void RenderMainUi()
 {
-    using namespace ftxui;
-    using namespace riptop;
-
 
     auto title = Renderer([&] {
         auto content = vbox(text("riptop") | hcenter) | bgcolor(Color::Blue);
-        return (content);
+        return content;
     });
 
+    // system usageg & informations
     auto usage_gauge = [&](std::string name, float value) {
         
         ftxui::Color::Palette256 gauge_color = Color::Green1;
@@ -55,13 +57,13 @@ void RenderMainUi()
         if (value > 0.5 ) {
             gauge_color = Color::Orange1;
         }
-        else if (value > 0.75)
+        if (value > 0.75)
         {
              gauge_color = Color::Red1;
         }
-        auto content = hbox(text(name) | color(Color::Cyan3), text("["), gauge(value) | color(gauge_color) | flex,
+        auto content = hbox(separatorEmpty(), text(name) | color(Color::Cyan3), text("["), gauge(value) | color(gauge_color) | flex,
                             text(std::format("{:2.1f}", value * 100)) | color(Color::GrayDark), text("%") | color(Color::GrayDark),
-                            text("]") | size(WIDTH, EQUAL, 5));
+                            text("]") ) | size(WIDTH, EQUAL, 25);
         return content;
     };
 
@@ -73,23 +75,20 @@ void RenderMainUi()
                    usage_gauge("CPU", static_cast<float>(system_times.cpu_usage())),
                    usage_gauge("MEM", static_cast<float>(mem_info.used_memory_percentage())),
                    usage_gauge("PGE", static_cast<float>(mem_info.used_page_memory_percentage())),
-               }) | flex;
+               }) ;
     };
     
-
     auto system_info_area = [&](const MemoryUsageInfo& mem_info) {
         SystemInfo system_info;
 
         return vbox({
-            hbox(text("Tasks: ")  | color(Color::Cyan3), text("290 total, 5 running")),
-            hbox(text("Size: ")   | color(Color::Cyan3), text(format_memory(mem_info.total_memory()))),
-            hbox(text("Uptime: ") | color(Color::Cyan3), text(system_info.GetUptime())),
-            hbox(text("Proc: ")   | color(Color::Cyan3), text(system_info.processor_name())),
-        }) | flex;
+             hbox(separatorEmpty(), text("Tasks: ")  | color(Color::Cyan3), text("290 total, 5 running")),
+             hbox(separatorEmpty(), text("Size: ")   | color(Color::Cyan3), text(format_memory(mem_info.total_memory()))),
+             hbox(separatorEmpty(), text("Uptime: ") | color(Color::Cyan3), text(system_info.GetUptime())),
+             hbox(separatorEmpty(), text("Proc: ")   | color(Color::Cyan3), text(system_info.processor_name())),
+        }) ;
     };
     
-
-
     auto global_usage = Renderer([&] {
         MemoryUsageInfo mem_info;
 
@@ -97,10 +96,12 @@ void RenderMainUi()
             usage_gauges_area(mem_info), 
             filler(),
             system_info_area(mem_info)
-            }) ;
+            }) | xflex_grow;
         return content;
     });
 
+
+    // process table
     std::vector<std::vector<std::string>> outputs(65, std::vector<std::string>(9, ""));
     outputs[0] = {"PID", "USER", "PRI", "CPU%", "MEM", "THREAD", "DISK", "TIME", "PROCESS"};
     auto process_table_renderer = Renderer([&] {
@@ -118,9 +119,11 @@ void RenderMainUi()
         auto content = process_table.SelectRows(1, -1);
         content.DecorateCellsAlternateRow(color(Color::Cyan), 2, 0);
         content.DecorateCellsAlternateRow(color(Color::White), 2, 1);
-        return vbox({process_table.Render() | vscroll_indicator | frame | border });
+        return vbox({process_table.Render() | vscroll_indicator | frame | flex_grow });
     });
 
+
+    // Main screen, renderer and ui refresh thread
     auto screen = ScreenInteractive::FitComponent();
 
     auto renderer = Renderer([&] {
@@ -130,7 +133,7 @@ void RenderMainUi()
                      global_usage->Render(), 
                      separator(),
                      process_table_renderer->Render()
-                   }); 
+                   }) | flex; 
     });
 
     int         shift {0};
