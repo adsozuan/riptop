@@ -49,10 +49,18 @@ void RenderMainUi()
     });
 
     auto usage_gauge = [&](std::string name, float value) {
-        std::ostringstream value_stream;
-        value_stream << std::setprecision(3) << value * 100;
-        auto content = hbox(text(name) | color(Color::Cyan3), text("["), gauge(value) | color(Color::Green) | flex,
-                            text(value_stream.str()) | color(Color::GrayDark), text("%") | color(Color::GrayDark),
+        
+        ftxui::Color::Palette256 gauge_color = Color::Green1;
+
+        if (value > 0.5 && value < 0.75) {
+            gauge_color = Color::Orange1;
+        }
+        else 
+        {
+             gauge_color = Color::Red1;
+        }
+        auto content = hbox(text(name) | color(Color::Cyan3), text("["), gauge(value) | color(gauge_color) | flex,
+                            text(std::format("{:2.1f}", value * 100)) | color(Color::GrayDark), text("%") | color(Color::GrayDark),
                             text("]") | size(WIDTH, EQUAL, 5));
         return content;
     };
@@ -115,8 +123,7 @@ void RenderMainUi()
                      global_usage->Render(), 
                      separator(),
                      process_table_renderer->Render()
-            }) |
-               size(WIDTH, GREATER_THAN, 80);
+                   }); 
     });
 
     int         shift {0};
