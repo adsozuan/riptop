@@ -14,8 +14,7 @@
 
 #include <format>
 
-void ProcessListToTable(std::vector<std::vector<std::string>>& outputs,
-                                                         const std::vector<Process>&            processes)
+void ProcessListToTable(std::vector<std::vector<std::string>>& outputs, const std::vector<Process>& processes)
 {
     int line_number = 1; // 0 is allocated to column header
     for (auto& process : processes)
@@ -129,7 +128,6 @@ void RenderMainUi()
     });
 
     std::thread process_list_update([&] {
-
     });
 
     screen.Loop(renderer);
