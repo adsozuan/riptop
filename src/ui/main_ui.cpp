@@ -63,7 +63,7 @@ void RenderMainUi()
         }
         auto content = hbox(separatorEmpty(), text(name) | color(Color::Cyan3), text("["), gauge(value) | color(gauge_color) | flex,
                             text(std::format("{:2.1f}", value * 100)) | color(Color::GrayDark), text("%") | color(Color::GrayDark),
-                            text("]") ) | size(WIDTH, EQUAL, 25);
+                            text("]") ) | size(WIDTH, EQUAL, 35);
         return content;
     };
 
@@ -110,6 +110,15 @@ void RenderMainUi()
         ProcessListToTable(outputs, process_list.processes());
         auto process_table = Table(outputs);
 
+        // set columns width
+        std::vector<int> columns_width = {7, 9, 3, 5, 11, 4, 9, 8, 30};
+        int col {0};
+        for (auto column_width : columns_width)
+		{
+            process_table.SelectColumn(col).DecorateCells(size(WIDTH, Constraint::EQUAL, column_width));
+            col++;
+		}
+
         process_table.SelectColumns(0, 7).DecorateCells(align_right);
         process_table.SelectCell(0, 0).DecorateCells(bgcolor(Color::CyanLight));
         process_table.SelectRow(0).SeparatorVertical(EMPTY);
@@ -129,9 +138,9 @@ void RenderMainUi()
     auto renderer = Renderer([&] {
         return vbox({
                      title->Render(), 
-                     separator(), 
+                     separatorEmpty(), 
                      global_usage->Render(), 
-                     separator(),
+                     separatorEmpty(), 
                      process_table_renderer->Render()
                    }) | flex; 
     });
