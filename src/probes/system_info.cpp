@@ -18,6 +18,7 @@ void SystemInfo::Update()
 {
     UpdateCpuCount();
     UpdateProcessorName();
+    UpdateComputerName();
 }
 
 std::string SystemInfo::GetUptime()
@@ -46,4 +47,13 @@ void riptop::SystemInfo::UpdateProcessorName()
         }
     }
     processor_name_ = cpu_name;
+}
+
+void riptop::SystemInfo::UpdateComputerName()
+{
+    static TCHAR computer_name[16] {};
+    DWORD        size = 16;
+    GetComputerName(computer_name, &size);
+    computer_name_ = computer_name;
+
 }
