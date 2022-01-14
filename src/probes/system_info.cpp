@@ -18,7 +18,7 @@ void SystemInfo::Update()
     UpdateComputerName();
 }
 
-std::string SystemInfo::GetUptime()
+std::string SystemInfo::GetUptime() const
 {
     auto uptime = std::chrono::milliseconds(GetTickCount64());
     return std::format("{:%H:%M:%S}", std::chrono::duration_cast<std::chrono::seconds>(uptime));

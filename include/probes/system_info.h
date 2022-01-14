@@ -10,11 +10,11 @@ namespace riptop
       public:
         SystemInfo();
         void        Update();
-        std::string GetUptime();
+        std::string GetUptime() const;
 
-        int64_t     cpu_core_count() { return cpu_core_count_; }
-        std::string processor_name() { return processor_name_; }
-        std::string computer_name() { return computer_name_; }
+        int64_t     cpu_core_count() const { return cpu_core_count_; }
+        std::string processor_name() const { return processor_name_; }
+        std::string computer_name() const { return computer_name_; }
 
       private:
         void UpdateCpuCount();

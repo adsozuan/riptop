@@ -45,6 +45,10 @@ void RenderMainUi()
 {
 
     SystemInfo system_info;
+    SystemTimes system_times;
+    MemoryUsageInfo mem_info;
+    ProcessList process_list;
+
     auto title = Renderer([&] {
         auto title_value = std::format("riptop on {}", system_info.computer_name());
         auto content = hbox(text(title_value)) | hcenter | bgcolor(Color::Blue);
@@ -70,9 +74,6 @@ void RenderMainUi()
     };
 
     auto usage_gauges_area = [&](const MemoryUsageInfo& mem_info) {
-        SystemTimes system_times;
-        system_times.UpdateCpuUsage();
-
         return vbox({
                    usage_gauge("CPU", static_cast<float>(system_times.cpu_usage())),
                    usage_gauge("MEM", static_cast<float>(mem_info.used_memory_percentage())),
@@ -81,7 +82,6 @@ void RenderMainUi()
     };
     
     auto system_info_area = [&](const MemoryUsageInfo& mem_info) {
-        SystemInfo system_info;
 
         return vbox({
              hbox(separatorEmpty(), text("Tasks: ")  | color(Color::Cyan3), text("290 total, 5 running")),
@@ -92,7 +92,6 @@ void RenderMainUi()
     };
     
     auto global_usage = Renderer([&] {
-        MemoryUsageInfo mem_info;
 
         auto content = hbox({
             usage_gauges_area(mem_info), 
@@ -102,15 +101,13 @@ void RenderMainUi()
         return content;
     });
 
-
     // process table
-    std::vector<std::vector<std::string>> outputs(ProcessList::PROCESS_MAX_NUMBER, std::vector<std::string>(9, ""));
+    std::vector<std::vector<std::string>> outputs(ProcessList::PROCESS_MAX_NUMBER + 1, std::vector<std::string>(9, ""));
     outputs[0] = {"PID", "USER", "PRI", "CPU%", "MEM", "THREAD", "DISK", "TIME", "PROCESS"};
+
     auto process_table_renderer = Renderer([&] {
-        ProcessList process_list;
-        process_list.UpdateProcessList(100);
-        ProcessListToTable(outputs, process_list.processes());
         auto process_table = Table(outputs);
+        ProcessListToTable(outputs, process_list.processes());
 
         // set columns width
         std::vector<int> columns_width = {7, 9, 3, 5, 11, 4, 9, 8, 30};
@@ -133,6 +130,21 @@ void RenderMainUi()
         return vbox({process_table.Render() | vscroll_indicator | frame | flex_grow });
     });
 
+    int line_selected = 3;
+    process_list.UpdateProcessList(100);
+
+    std::vector<std::string> processes; 
+    processes.resize(ProcessList::PROCESS_MAX_NUMBER+1);
+
+	auto r = std::format("{:>7} {:>9} {:>3} {:>4}% {:>10} {:>6} {:>11} {:>8} {}", 
+        "PID", "USER", "PRI", "CPU", "MEM", "THREAD", "DISK", "TIME", "PROCESS"
+        );
+
+    processes[0] = r;
+
+    process_list.FormatToProcessesRows(processes);
+
+    auto lines = Menu(&processes, &line_selected);
 
     // Main screen, renderer and ui refresh thread
     auto screen = ScreenInteractive::FitComponent();
@@ -141,9 +153,9 @@ void RenderMainUi()
         return vbox({
                      title->Render(), 
                      separatorEmpty(), 
-                     global_usage->Render(), 
+                     global_usage->Render() , 
                      separatorEmpty(), 
-                     process_table_renderer->Render()
+                     lines->Render() | flex
                    }) | flex; 
     });
 
@@ -153,6 +165,13 @@ void RenderMainUi()
         while (refresh_ui_continue)
         {
             using namespace std::chrono_literals;
+
+            system_info.Update();
+            system_times.UpdateCpuUsage();
+            mem_info.Update();
+            process_list.UpdateProcessList(100);
+			process_list.FormatToProcessesRows(processes);
+
             std::this_thread::sleep_for(500ms);
             shift++;
             screen.PostEvent(Event::Custom);

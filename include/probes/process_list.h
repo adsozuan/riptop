@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <windows.h>
+#include <string>
 
 namespace riptop
 {
@@ -30,6 +31,7 @@ namespace riptop
         bool                 UpdateProcessList(size_t update_interval_s);
         void                 SortProcessList();
         std::vector<Process> processes() { return processes_; };
+        void                 FormatToProcessesRows(std::vector<std::string>& rows) const;
         static const size_t  PROCESS_MAX_NUMBER {300};
 
       private:
