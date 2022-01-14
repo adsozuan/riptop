@@ -51,7 +51,7 @@ add_library(ui
 target_link_libraries(ui
   PRIVATE ftxui::screen
   PRIVATE ftxui::dom
-  PRIVATE ftxui::component # Not needed for this example.
+  PRIVATE ftxui::component 
 )
 set_target_properties(ui PROPERTIES 
 	LINKER_LANGUAGE CXX
@@ -60,14 +60,12 @@ set_target_properties(ui PROPERTIES
 	)
 
 
-add_executable(riptop main.cpp)
+add_executable(riptop "main.cpp")
 set_target_properties(riptop PROPERTIES 
 	ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 	LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
-
-
 
 
 target_link_libraries(riptop

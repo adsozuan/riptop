@@ -5,12 +5,15 @@
 #include "../../include/probes/system_times.h"
 #include "../../include/utils/formatter.h"
 
+
 #include "ftxui/component/screen_interactive.hpp"
+#include "ftxui/component/captured_mouse.hpp"
+#include "ftxui/component/component.hpp"
+#include "ftxui/component/component_base.hpp"
 #include "ftxui/dom/elements.hpp"
 #include "ftxui/dom/table.hpp"
 #include "ftxui/screen/screen.hpp"
 #include "ftxui/screen/string.hpp"
-#include "ftxui/component/component.hpp"
 
 #include <format>
 
@@ -40,8 +43,18 @@ void ProcessListToTable(std::vector<std::vector<std::string>>& outputs, const st
     }
 }
 
+Component MakeProcessTable(std::vector<std::string>& processes, Component component) 
+{
+  return Renderer([processes, component] {
+    return hbox({
+               component->Render() |  vscroll_indicator | frame | yflex,
+           }) |
+           yflex;
+  });
+}
 
-void RenderMainUi()
+
+void riptop::RenderMainUi()
 {
 
     SystemInfo system_info;
@@ -145,17 +158,24 @@ void RenderMainUi()
     process_list.FormatToProcessesRows(processes);
 
     auto lines = Menu(&processes, &line_selected);
+    lines->TakeFocus();
+
+    auto lines_component = MakeProcessTable(processes, lines);
+
+    auto container = Container::Vertical({
+        lines_component
+        });
 
     // Main screen, renderer and ui refresh thread
     auto screen = ScreenInteractive::FitComponent();
 
-    auto renderer = Renderer([&] {
+    auto renderer = Renderer(container, [&] {
         return vbox({
                      title->Render(), 
                      separatorEmpty(), 
                      global_usage->Render() , 
                      separatorEmpty(), 
-                     lines->Render() | flex
+                     lines_component->Render() | flex
                    }) | flex; 
     });
 

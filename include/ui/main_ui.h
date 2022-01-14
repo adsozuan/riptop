@@ -1,3 +1,7 @@
 #pragma once
 
-void RenderMainUi();
+
+namespace riptop
+{
+	void RenderMainUi();
+}
