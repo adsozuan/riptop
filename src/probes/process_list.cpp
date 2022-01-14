@@ -7,7 +7,7 @@
 
 riptop::ProcessList::ProcessList()
 {
-    processes_.reserve(64);
+    processes_.reserve(300);
 }
 
 void riptop::ProcessList::SortProcessList()
@@ -42,7 +42,6 @@ bool riptop::ProcessList::UpdateProcessList(size_t update_interval_s)
 
     // Now walk the snapshot of processes, and
     // display information about each process in turn
-    int process_count = 64;
     do
     {
         Process process       = {0};
@@ -57,7 +56,7 @@ bool riptop::ProcessList::UpdateProcessList(size_t update_interval_s)
         dwPriorityClass = 0;
         process.handle  = OpenProcess(PROCESS_ALL_ACCESS, FALSE, process_entry.th32ProcessID);
         {
-            if (processes_.size() < process_count)
+            if (processes_.size() < PROCESS_MAX_NUMBER)
                 processes_.push_back(process);
 
             dwPriorityClass = GetPriorityClass(process.handle);

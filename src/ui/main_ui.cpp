@@ -104,7 +104,7 @@ void RenderMainUi()
 
 
     // process table
-    std::vector<std::vector<std::string>> outputs(65, std::vector<std::string>(9, ""));
+    std::vector<std::vector<std::string>> outputs(ProcessList::PROCESS_MAX_NUMBER, std::vector<std::string>(9, ""));
     outputs[0] = {"PID", "USER", "PRI", "CPU%", "MEM", "THREAD", "DISK", "TIME", "PROCESS"};
     auto process_table_renderer = Renderer([&] {
         ProcessList process_list;
