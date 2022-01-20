@@ -17,17 +17,34 @@ endif()
 
 # ------------------------------------------------------------------------------
 
+# --- Fetch concurrentqueue --------------------------------------------------------------
+include(FetchContent)
+
+set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
+FetchContent_Declare(
+  concurrentqueue
+  GIT_REPOSITORY  https://github.com/cameron314/concurrentqueue
+  GIT_TAG v1.0.3
+)
+
+FetchContent_GetProperties(concurrentqueue)
+if(NOT concurrentqueue_POPULATED)
+  FetchContent_Populate(concurrentqueue)
+  add_subdirectory(${concurrentqueue_SOURCE_DIR} ${concurrentqueue_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
+# ------------------------------------------------------------------------------
 
 # probes library
 add_library(probes 
-	"probes/memory_usage_info.cpp"
-	"probes/system_info.cpp"
-	"probes/system_times.cpp" 
-	"probes/process_list.cpp" 
-	"../include/probes/memory_usage_info.h"
-	"../include/probes/system_info.h" 
-	"../include/probes/system_times.h" 
-	"../include/probes/process_list.h")
+	"probes/memory_usage_probe.cpp"
+	"probes/system_info_probe.cpp"
+	"probes/system_times_probe.cpp" 
+	"probes/process_list_probe.cpp" 
+	"../include/probes/memory_usage_probe.h"
+	"../include/probes/system_info_probe.h" 
+	"../include/probes/system_times_probe.h" 
+	"../include/probes/process_list_probe.h")
 set_target_properties(probes PROPERTIES 
 	LINKER_LANGUAGE CXX
 	ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
@@ -46,8 +63,14 @@ set_target_properties(utils PROPERTIES
 
 # ui library
 add_library(ui 
+	"../include/ui/main_ui.h" 
+	"../include/ui/main_component.h" 
+	"../include/ui/process_list_component.h"
+	"../include/ui/system_info_component.h"
 	"ui/main_ui.cpp" 
-	"../include/ui/main_ui.h")
+	"ui/process_list_component.cpp" 
+	"ui/main_component.cpp" 
+	"ui/system_info_component.cpp")
 target_link_libraries(ui
   PRIVATE ftxui::screen
   PRIVATE ftxui::dom
@@ -66,12 +89,27 @@ set_target_properties(riptop PROPERTIES
 	LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
+target_include_directories(riptop
+  PRIVATE src
+  PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen
+)
+
 
 
 target_link_libraries(riptop
+  PRIVATE ftxui::screen
+  PRIVATE ftxui::component
+  PRIVATE concurrentqueue
   PRIVATE probes
   PRIVATE utils
   PRIVATE ui
 )
+
+if (MSVC)
+  target_compile_options(riptop PRIVATE "/wd4244")
+  target_compile_options(riptop PRIVATE "/wd4267")
+  target_compile_options(riptop PRIVATE "/wd4996")
+  target_compile_options(riptop PRIVATE "/wd4305")
+endif()
 
 install(TARGETS riptop probes utils ui RUNTIME DESTINATION "bin")

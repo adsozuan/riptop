@@ -12,11 +12,11 @@ namespace riptop
         FILETIME user_time;
     };
 
-    class SystemTimes
+    class SystemTimesProbe
     {
       public:
         void   UpdateCpuUsage();
-        double cpu_usage() { return cpu_usage_; }
+        double cpu_usage() const { return cpu_usage_; }
 
       private:
         uint64_t SubtractTimes(const FILETIME* a, const FILETIME* b);

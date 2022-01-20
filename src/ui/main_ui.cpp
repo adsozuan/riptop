@@ -1,10 +1,9 @@
 #include "../../include/ui/main_ui.h"
-#include "../../include/probes/memory_usage_info.h"
-#include "../../include/probes/process_list.h"
-#include "../../include/probes/system_info.h"
-#include "../../include/probes/system_times.h"
+#include "../../include/probes/memory_usage_probe.h"
+#include "../../include/probes/process_list_probe.h"
+#include "../../include/probes/system_info_probe.h"
+#include "../../include/probes/system_times_probe.h"
 #include "../../include/utils/formatter.h"
-
 
 #include "ftxui/component/screen_interactive.hpp"
 #include "ftxui/component/captured_mouse.hpp"
@@ -17,7 +16,7 @@
 
 #include <format>
 
-// clang-format off
+// clang-format on
 
 using namespace ftxui;
 using namespace riptop;
@@ -43,79 +42,181 @@ void ProcessListToTable(std::vector<std::vector<std::string>>& outputs, const st
     }
 }
 
-Component MakeProcessTable(std::vector<std::string>& processes, Component component) 
+Component MakeProcessTable(Component component)
 {
-  return Renderer([processes, component] {
-    return hbox({
-               component->Render() |  vscroll_indicator | frame | yflex,
-           }) |
-           yflex;
-  });
+    return Renderer([component] {
+        return hbox({
+                   component->Render() | vscroll_indicator | frame | yflex,
+               }) |
+               yflex;
+    });
 }
 
+Component riptop::MakeMainUi()
+{
+
+    class Impl : public ComponentBase
+    {
+      public:
+        Impl()
+        {
+            // processes_ = std::vector<std::string>(21, " NONE ");
+        }
+
+      private:
+        Element Render() override
+        {
+            auto title = Renderer([&] {
+                auto title_value = std::format("riptop on {}", "COMPUTER");
+                auto content     = hbox(text(title_value)) | hcenter | bgcolor(Color::Blue);
+                return content;
+            });
+
+            auto usage_gauge = [](std::string name, float value) {
+                ftxui::Color::Palette256 gauge_color = Color::Green1;
+
+                if (value > 0.5)
+                {
+                    gauge_color = Color::Orange1;
+                }
+                if (value > 0.75)
+                {
+                    gauge_color = Color::Red1;
+                }
+                auto content = hbox(separatorEmpty(), text(name) | color(Color::Cyan3), text("["),
+                                    gauge(value) | color(gauge_color) | flex,
+                                    text(std::format("{:2.1f}", value * 100)) | color(Color::GrayDark),
+                                    text("%") | color(Color::GrayDark), text("]")) |
+                               size(WIDTH, EQUAL, 35);
+                return content;
+            };
+
+            auto usage_gauges_area = [&]() {
+                auto cpu_usage                   = static_cast<float>(10.1);
+                auto used_memory_percentage      = static_cast<float>(22.4);
+                auto used_page_memory_percentage = static_cast<float>(0.5);
+
+                return vbox({
+                    usage_gauge("CPU", cpu_usage),
+                    usage_gauge("MEM", used_memory_percentage),
+                    usage_gauge("PGE", used_page_memory_percentage),
+                });
+            };
+
+            auto system_info_area = [&]() {
+                return vbox({
+                    hbox(separatorEmpty(), text("Tasks: ") | color(Color::Cyan3), text("290 total, 5 running")),
+                    hbox(separatorEmpty(), text("Size: ") | color(Color::Cyan3), text(format_memory(322))),
+                    hbox(separatorEmpty(), text("Uptime: ") | color(Color::Cyan3), text("TIME")),
+                    hbox(separatorEmpty(), text("Proc: ") | color(Color::Cyan3), text("CPU BB")),
+                });
+            };
+
+            auto global_usage = Renderer([&] {
+                auto content = hbox({usage_gauges_area(), filler(), system_info_area()}) | xflex_grow;
+                return content;
+            });
+            // process table
+
+            int line_selected = 3;
+            // process_list_.UpdateProcessList(100);
+
+            // processes_.resize(ProcessList::PROCESS_MAX_NUMBER + 1);
+
+            auto r = std::format("{:>7} {:>9} {:>3} {:>4}% {:>10} {:>6} {:>11} {:>8} {}", "PID", "USER", "PRI", "CPU",
+                                 "MEM", "THREAD", "DISK", "TIME", "PROCESS");
+
+            // processes_[0] = r;
+            // processes_[1] = " NONE ";
+            // processes_[2] = " NONE ";
+
+            // process_list_.FormatToProcessesRows(processes_);
+
+            auto lines = Menu(&processes_, &line_selected);
+            lines->TakeFocus();
+
+            auto lines_component = MakeProcessTable(lines);
+
+            auto container = Container::Vertical({lines});
+
+            auto renderer = Renderer(container, [&] {
+                return vbox({title->Render(), separatorEmpty(), global_usage->Render(), separatorEmpty(),
+                             lines->Render() | flex}) |
+                       flex;
+            });
+
+            return renderer->Render();
+        };
+
+        const std::vector<std::string> processes_ {"None"};
+    };
+    return Make<Impl>();
+}
+
+void riptop::RenderMainUi(ScreenInteractive* screen)
+{
+    auto component = MakeMainUi();
+    screen->Loop(component);
+}
 
 void riptop::RenderMainUi()
 {
 
-    SystemInfo system_info;
-    SystemTimes system_times;
-    MemoryUsageInfo mem_info;
-    ProcessList process_list;
+    SystemInfoProbe      system_info;
+    SystemTimesProbe     system_times;
+    MemoryUsageProbe mem_info;
+    ProcessListProbe     process_list;
 
     auto title = Renderer([&] {
         auto title_value = std::format("riptop on {}", system_info.computer_name());
-        auto content = hbox(text(title_value)) | hcenter | bgcolor(Color::Blue);
+        auto content     = hbox(text(title_value)) | hcenter | bgcolor(Color::Blue);
         return content;
     });
 
     // system usageg & informations
     auto usage_gauge = [&](std::string name, float value) {
-        
         ftxui::Color::Palette256 gauge_color = Color::Green1;
 
-        if (value > 0.5 ) {
+        if (value > 0.5)
+        {
             gauge_color = Color::Orange1;
         }
         if (value > 0.75)
         {
-             gauge_color = Color::Red1;
+            gauge_color = Color::Red1;
         }
-        auto content = hbox(separatorEmpty(), text(name) | color(Color::Cyan3), text("["), gauge(value) | color(gauge_color) | flex,
-                            text(std::format("{:2.1f}", value * 100)) | color(Color::GrayDark), text("%") | color(Color::GrayDark),
-                            text("]") ) | size(WIDTH, EQUAL, 35);
+        auto content = hbox(separatorEmpty(), text(name) | color(Color::Cyan3), text("["),
+                            gauge(value) | color(gauge_color) | flex,
+                            text(std::format("{:2.1f}", value * 100)) | color(Color::GrayDark),
+                            text("%") | color(Color::GrayDark), text("]")) |
+                       size(WIDTH, EQUAL, 35);
         return content;
     };
 
-    auto usage_gauges_area = [&](const MemoryUsageInfo& mem_info) {
+    auto usage_gauges_area = [&](const MemoryUsageProbe& mem_info) {
         return vbox({
-                   usage_gauge("CPU", static_cast<float>(system_times.cpu_usage())),
-                   usage_gauge("MEM", static_cast<float>(mem_info.used_memory_percentage())),
-                   usage_gauge("PGE", static_cast<float>(mem_info.used_page_memory_percentage())),
-               }) ;
+            usage_gauge("CPU", static_cast<float>(system_times.cpu_usage())),
+            usage_gauge("MEM", static_cast<float>(mem_info.used_memory_percentage())),
+            usage_gauge("PGE", static_cast<float>(mem_info.used_page_memory_percentage())),
+        });
     };
-    
-    auto system_info_area = [&](const MemoryUsageInfo& mem_info) {
 
+    auto system_info_area = [&](const MemoryUsageProbe& mem_info) {
         return vbox({
-             hbox(separatorEmpty(), text("Tasks: ")  | color(Color::Cyan3), text("290 total, 5 running")),
-             hbox(separatorEmpty(), text("Size: ")   | color(Color::Cyan3), text(format_memory(mem_info.total_memory()))),
-             hbox(separatorEmpty(), text("Uptime: ") | color(Color::Cyan3), text(system_info.GetUptime())),
-             hbox(separatorEmpty(), text("Proc: ")   | color(Color::Cyan3), text(system_info.processor_name())),
-        }) ;
+            hbox(separatorEmpty(), text("Tasks: ") | color(Color::Cyan3), text("290 total, 5 running")),
+            hbox(separatorEmpty(), text("Size: ") | color(Color::Cyan3), text(format_memory(mem_info.total_memory()))),
+            hbox(separatorEmpty(), text("Uptime: ") | color(Color::Cyan3), text(system_info.GetUptime())),
+            hbox(separatorEmpty(), text("Proc: ") | color(Color::Cyan3), text(system_info.processor_name())),
+        });
     };
-    
+
     auto global_usage = Renderer([&] {
-
-        auto content = hbox({
-            usage_gauges_area(mem_info), 
-            filler(),
-            system_info_area(mem_info)
-            }) | xflex_grow;
+        auto content = hbox({usage_gauges_area(mem_info), filler(), system_info_area(mem_info)}) | xflex_grow;
         return content;
     });
 
     // process table
-    std::vector<std::vector<std::string>> outputs(ProcessList::PROCESS_MAX_NUMBER + 1, std::vector<std::string>(9, ""));
+    std::vector<std::vector<std::string>> outputs(ProcessListProbe::PROCESS_MAX_NUMBER + 1, std::vector<std::string>(9, ""));
     outputs[0] = {"PID", "USER", "PRI", "CPU%", "MEM", "THREAD", "DISK", "TIME", "PROCESS"};
 
     auto process_table_renderer = Renderer([&] {
@@ -124,12 +225,12 @@ void riptop::RenderMainUi()
 
         // set columns width
         std::vector<int> columns_width = {7, 9, 3, 5, 11, 4, 9, 8, 30};
-        int col {0};
+        int              col {0};
         for (auto column_width : columns_width)
-		{
+        {
             process_table.SelectColumn(col).DecorateCells(size(WIDTH, Constraint::EQUAL, column_width));
             col++;
-		}
+        }
 
         process_table.SelectColumns(0, 7).DecorateCells(align_right);
         process_table.SelectCell(0, 0).DecorateCells(bgcolor(Color::CyanLight));
@@ -140,43 +241,35 @@ void riptop::RenderMainUi()
         auto content = process_table.SelectRows(1, -1);
         content.DecorateCellsAlternateRow(color(Color::Cyan), 2, 0);
         content.DecorateCellsAlternateRow(color(Color::White), 2, 1);
-        return vbox({process_table.Render() | vscroll_indicator | frame | flex_grow });
+        return vbox({process_table.Render() | vscroll_indicator | frame | flex_grow});
     });
 
     int line_selected = 3;
     process_list.UpdateProcessList(100);
 
-    std::vector<std::string> processes; 
-    processes.resize(ProcessList::PROCESS_MAX_NUMBER+1);
+    std::vector<std::string> processes;
+    processes.resize(ProcessListProbe::PROCESS_MAX_NUMBER + 1);
 
-	auto r = std::format("{:>7} {:>9} {:>3} {:>4}% {:>10} {:>6} {:>11} {:>8} {}", 
-        "PID", "USER", "PRI", "CPU", "MEM", "THREAD", "DISK", "TIME", "PROCESS"
-        );
+    auto r = std::format("{:>7} {:>9} {:>3} {:>4}% {:>10} {:>6} {:>11} {:>8} {}", "PID", "USER", "PRI", "CPU", "MEM",
+                         "THREAD", "DISK", "TIME", "PROCESS");
 
     processes[0] = r;
 
-    process_list.FormatToProcessesRows(processes);
 
     auto lines = Menu(&processes, &line_selected);
     lines->TakeFocus();
 
-    auto lines_component = MakeProcessTable(processes, lines);
+    auto lines_component = MakeProcessTable(lines);
 
-    auto container = Container::Vertical({
-        lines_component
-        });
+    auto container = Container::Vertical({lines_component});
 
     // Main screen, renderer and ui refresh thread
     auto screen = ScreenInteractive::FitComponent();
 
     auto renderer = Renderer(container, [&] {
-        return vbox({
-                     title->Render(), 
-                     separatorEmpty(), 
-                     global_usage->Render() , 
-                     separatorEmpty(), 
-                     lines_component->Render() | flex
-                   }) | flex; 
+        return vbox({title->Render(), separatorEmpty(), global_usage->Render(), separatorEmpty(),
+                     lines_component->Render() | flex}) |
+               flex;
     });
 
     int         shift {0};
@@ -190,7 +283,6 @@ void riptop::RenderMainUi()
             system_times.UpdateCpuUsage();
             mem_info.Update();
             process_list.UpdateProcessList(100);
-			process_list.FormatToProcessesRows(processes);
 
             std::this_thread::sleep_for(500ms);
             shift++;
@@ -203,4 +295,4 @@ void riptop::RenderMainUi()
     refresh_ui.join();
 }
 
-// clang-format on 
+// clang-format on

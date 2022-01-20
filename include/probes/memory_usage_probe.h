@@ -6,11 +6,10 @@
 
 namespace riptop
 {
-
-    class MemoryUsageInfo
+    class MemoryUsageProbe
     {
       public:
-        MemoryUsageInfo();
+        MemoryUsageProbe();
         void Update();
 
         int64_t total_memory() const { return total_memory_; }

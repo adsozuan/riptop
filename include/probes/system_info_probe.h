@@ -5,10 +5,10 @@
 
 namespace riptop
 {
-    class SystemInfo
+    class SystemInfoProbe
     {
       public:
-        SystemInfo();
+        SystemInfoProbe();
         void        Update();
         std::string GetUptime() const;
 

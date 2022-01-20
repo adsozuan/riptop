@@ -1,9 +1,9 @@
-#include "..\..\include\probes\system_times.h"
+#include "..\..\include\probes\system_times_probe.h"
 
 #include <algorithm>
 #include <thread>
 
-void riptop::SystemTimes::UpdateCpuUsage()
+void riptop::SystemTimesProbe::UpdateCpuUsage()
 {
     using namespace std::chrono_literals;
 
@@ -25,7 +25,7 @@ void riptop::SystemTimes::UpdateCpuUsage()
     }
 }
 
-uint64_t riptop::SystemTimes::SubtractTimes(const FILETIME* a, const FILETIME* b)
+uint64_t riptop::SystemTimesProbe::SubtractTimes(const FILETIME* a, const FILETIME* b)
 {
     LARGE_INTEGER la {};
     LARGE_INTEGER lb {};

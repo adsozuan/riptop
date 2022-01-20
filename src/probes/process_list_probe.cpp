@@ -1,4 +1,4 @@
-#include "..\..\include\probes\process_list.h"
+#include "..\..\include\probes\process_list_probe.h"
 
 #include <chrono>
 #include <format>
@@ -7,27 +7,11 @@
 #include <tchar.h>
 #include <tlhelp32.h>
 
-riptop::ProcessList::ProcessList() { processes_.reserve(PROCESS_MAX_NUMBER); }
+riptop::ProcessListProbe::ProcessListProbe() { processes_.reserve(PROCESS_MAX_NUMBER); }
 
-void riptop::ProcessList::SortProcessList() {}
+void riptop::ProcessListProbe::SortProcessList() {}
 
-void riptop::ProcessList::FormatToProcessesRows(std::vector<std::string>& rows) const
-{
-    int index = 1;
-    for (auto& process : processes_)
-    {
-        auto row =
-            std::format("{:>7d} {:>9} {:>3d} {:>4.1g}% {:>7d} MB {:>6d} {:>6d} MB/s {:>%H:%M:%S} {}", process.id,
-                        process.user_name, process.base_priority, process.percent_processor_time, process.used_memory,
-                        process.thread_count, process.disk_usage,
-                        std::chrono::duration_cast<std::chrono::seconds>(std::chrono::milliseconds(process.up_time)),
-                        process.exe_name);
-        rows[index] = row;
-        index++;
-    }
-}
-
-bool riptop::ProcessList::UpdateProcessList(size_t update_interval_s)
+bool riptop::ProcessListProbe::UpdateProcessList(size_t update_interval_s)
 {
     HANDLE         process_snap;
     PROCESSENTRY32 process_entry {};

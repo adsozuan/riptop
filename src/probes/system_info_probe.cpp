@@ -1,4 +1,4 @@
-#include "../../include/probes/system_info.h"
+#include "../../include/probes/system_info_probe.h"
 #include "../../include/utils/formatter.h"
 
 #include <chrono>
@@ -9,29 +9,29 @@
 
 using namespace riptop;
 
-SystemInfo::SystemInfo() { Update(); }
+SystemInfoProbe::SystemInfoProbe() { Update(); }
 
-void SystemInfo::Update()
+void SystemInfoProbe::Update()
 {
     UpdateCpuCount();
     UpdateProcessorName();
     UpdateComputerName();
 }
 
-std::string SystemInfo::GetUptime() const
+std::string SystemInfoProbe::GetUptime() const
 {
     auto uptime = std::chrono::milliseconds(GetTickCount64());
     return std::format("{:%H:%M:%S}", std::chrono::duration_cast<std::chrono::seconds>(uptime));
 }
 
-void riptop::SystemInfo::UpdateCpuCount()
+void riptop::SystemInfoProbe::UpdateCpuCount()
 {
     SYSTEM_INFO system_info;
     GetSystemInfo(&system_info);
     cpu_core_count_ = system_info.dwNumberOfProcessors;
 }
 
-void riptop::SystemInfo::UpdateProcessorName()
+void riptop::SystemInfoProbe::UpdateProcessorName()
 {
     static TCHAR cpu_name[256] {};
     HKEY         key;
@@ -46,7 +46,7 @@ void riptop::SystemInfo::UpdateProcessorName()
     processor_name_ = cpu_name;
 }
 
-void riptop::SystemInfo::UpdateComputerName()
+void riptop::SystemInfoProbe::UpdateComputerName()
 {
     static TCHAR computer_name[16] {};
     DWORD        size = 16;

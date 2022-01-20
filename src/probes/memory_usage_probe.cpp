@@ -1,14 +1,14 @@
-#include "../../include/probes/memory_usage_info.h"
+#include "../../include/probes/memory_usage_probe.h"
 
 using namespace riptop;
 
-MemoryUsageInfo::MemoryUsageInfo()
+MemoryUsageProbe::MemoryUsageProbe()
 {
     memory_info_.dwLength = sizeof(MEMORYSTATUSEX);
     Update();
 };
 
-void MemoryUsageInfo::Update()
+void MemoryUsageProbe::Update()
 {
     GlobalMemoryStatusEx(&memory_info_);
     total_memory_           = (memory_info_.ullTotalPhys);
