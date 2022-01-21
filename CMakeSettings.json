@@ -20,11 +20,6 @@
           "name": "BUILD_TESTING",
           "value": "True",
           "type": "BOOL"
-        },
-        {
-          "name": "CMAKE_INSTALL_PREFIX",
-          "value": "C:/Dev/riptop/out/install/x64-Debug",
-          "type": "PATH"
         }
       ]
     },

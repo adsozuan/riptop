@@ -23,8 +23,14 @@ ftxui::Element MainComponent::Render()
 
     process_table_->TakeFocus();
 
-    return vbox({title, separatorEmpty(), system_info_->Render(), separatorEmpty(),
-        process_table_->RenderProcesses()});
+    return vbox(
+        {
+            title , 
+			separatorEmpty(), 
+			system_info_->Render() | notflex, 
+			separatorEmpty(), 
+			process_table_->RenderProcesses() | yflex
+        });
 }
 
 bool MainComponent::OnEvent(ftxui::Event event) { return ComponentBase::OnEvent(event); }

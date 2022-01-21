@@ -53,7 +53,7 @@ ftxui::Element SystemInfoComponent::Render()
     };
 
     auto global_usage = Renderer([&] {
-        auto content = hbox({usage_gauges_area(), filler(), system_info_area()}) | xflex_grow;
+        auto content = hbox({usage_gauges_area(), filler(), system_info_area()});
         return content;
     });
 

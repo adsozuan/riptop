@@ -63,11 +63,9 @@ set_target_properties(utils PROPERTIES
 
 # ui library
 add_library(ui 
-	"../include/ui/main_ui.h" 
 	"../include/ui/main_component.h" 
 	"../include/ui/process_list_component.h"
 	"../include/ui/system_info_component.h"
-	"ui/main_ui.cpp" 
 	"ui/process_list_component.cpp" 
 	"ui/main_component.cpp" 
 	"ui/system_info_component.cpp")
@@ -90,7 +88,7 @@ set_target_properties(riptop PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
 target_include_directories(riptop
-  PRIVATE src
+  PRIVATE "../include"
   PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen
 )
 

@@ -15,9 +15,9 @@ struct SystemInfoDynamicData
 
 struct SystemInfoStaticData
 {
-    std::string processor_name;
-    std::string computer_name;
-    int64_t     total_memory;
+    std::string processor_name = "";
+    std::string computer_name  = "";
+    int64_t     total_memory   = 0;
 };
 
 using SystemInfoDataReceiver = ftxui::Receiver<SystemInfoDynamicData>;

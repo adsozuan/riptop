@@ -1,4 +1,3 @@
-#include "../include/ui/main_ui.h"
 #include "../include/ui/main_component.h"
 #include "../include/probes/system_info_probe.h"
 #include "../include/probes/system_times_probe.h"
@@ -6,11 +5,11 @@
 #include "../include/probes/memory_usage_probe.h"
 #include "../include/utils/formatter.h"
 
-#include "ftxui/component/screen_interactive.hpp"
-#include "ftxui/screen/screen.hpp"
-#include "ftxui/component/receiver.hpp"
-#include "ftxui/component/component.hpp"
-#include "ftxui/component/component_base.hpp"
+#include <ftxui/component/screen_interactive.hpp>
+#include <ftxui/screen/screen.hpp>
+#include <ftxui/component/receiver.hpp>
+#include <ftxui/component/component.hpp>
+#include <ftxui/component/component_base.hpp>
 
 #include <chrono>
 #include <thread>
@@ -25,8 +24,6 @@ void SystemDataProducer(Sender<std::vector<ProcessInfo>> process_sender,
                         MemoryUsageProbe mem_info, 
                         ScreenInteractive* screen)
 {
-    // SystemInfoProbe          system_info;
-    // MemoryUsageProbe         mem_info;
     SystemTimesProbe         system_times;
     ProcessListProbe         process_list;
     std::vector<ProcessInfo> processes(300);
@@ -69,7 +66,8 @@ void SystemDataProducer(Sender<std::vector<ProcessInfo>> process_sender,
         }
 
         system_info_sender->Send(system_info_data);
-        process_sender->Send(processes);
+        std::vector<ProcessInfo> processes_msg(processes);
+        process_sender->Send(processes_msg);
 
         std::this_thread::sleep_for(500ms);
         screen->PostEvent(Event::Custom);

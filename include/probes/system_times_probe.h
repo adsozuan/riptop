@@ -7,9 +7,9 @@ namespace riptop
 {
     struct TimesData
     {
-        FILETIME idle_time;
-        FILETIME kernel_time;
-        FILETIME user_time;
+        FILETIME idle_time ;
+        FILETIME kernel_time ;
+        FILETIME user_time ;
     };
 
     class SystemTimesProbe
@@ -23,10 +23,7 @@ namespace riptop
 
       private:
         double    cpu_usage_ {0.0};
-        TimesData current_;
-        TimesData previous_;
+        TimesData current_  {};
+        TimesData previous_ {};
     };
-}
-
-
-
+} // namespace riptop
