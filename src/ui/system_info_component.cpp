@@ -15,6 +15,11 @@ ftxui::Element SystemInfoComponent::Render()
 {
     using namespace ftxui;
 
+    while (receiver_->HasPending())
+    {
+        receiver_->Receive(&dynamic_data_);
+    }
+
     // clang-format off
     auto usage_gauge = [](std::string name, float value) {
         ftxui::Color::Palette256 gauge_color = Color::Green1;
@@ -64,9 +69,5 @@ ftxui::Element SystemInfoComponent::Render()
 
 bool SystemInfoComponent::OnEvent(ftxui::Event event)
 {
-    while (receiver_->HasPending())
-    {
-        receiver_->Receive(&dynamic_data_);
-    }
     return ftxui::ComponentBase::OnEvent(event);
 }
