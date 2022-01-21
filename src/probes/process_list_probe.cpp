@@ -7,7 +7,9 @@
 #include <tchar.h>
 #include <tlhelp32.h>
 
-riptop::ProcessListProbe::ProcessListProbe() { processes_.reserve(PROCESS_MAX_NUMBER); }
+riptop::ProcessListProbe::ProcessListProbe() { 
+    processes_.resize(PROCESSES_INITIAL_COUNT); 
+}
 
 void riptop::ProcessListProbe::SortProcessList() {}
 
@@ -39,6 +41,7 @@ bool riptop::ProcessListProbe::UpdateProcessList(size_t update_interval_s)
 
     // Now walk the snapshot of processes, and
     // display information about each process in turn
+    int index {0};
     do
     {
         Process process       = {0};
@@ -53,11 +56,18 @@ bool riptop::ProcessListProbe::UpdateProcessList(size_t update_interval_s)
         dwPriorityClass = 0;
         process.handle  = OpenProcess(PROCESS_ALL_ACCESS, FALSE, process_entry.th32ProcessID);
         {
-            if (processes_.size() < PROCESS_MAX_NUMBER)
+            if (index > processes_.size())
+            {
                 processes_.push_back(process);
+            }
+            else
+            {
+                processes_[index] = process;
+            }
 
             dwPriorityClass = GetPriorityClass(process.handle);
             CloseHandle(process.handle);
+            index++;
         }
 
     } while (Process32Next(process_snap, &process_entry));
