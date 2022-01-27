@@ -56,7 +56,7 @@ bool riptop::ProcessListProbe::UpdateProcessList(size_t update_interval_s)
         dwPriorityClass = 0;
         process.handle  = OpenProcess(PROCESS_ALL_ACCESS, FALSE, process_entry.th32ProcessID);
         {
-            if (index > processes_.size())
+            if (index >= processes_.size())
             {
                 processes_.push_back(process);
             }

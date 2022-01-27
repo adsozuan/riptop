@@ -26,7 +26,7 @@ void SystemDataProducer(Sender<std::vector<ProcessInfo>> process_sender,
 {
     SystemTimesProbe         system_times;
     ProcessListProbe         process_list;
-    std::vector<ProcessInfo> processes(300);
+    std::vector<ProcessInfo> processes(32);
 
     while (true)
     {
@@ -44,7 +44,7 @@ void SystemDataProducer(Sender<std::vector<ProcessInfo>> process_sender,
         system_info_data.up_time                      = system_info.GetUptime();
 
         auto process_count = process_list.processes().size();
-        if (process_count > processes.size())
+        if (process_count >= processes.size())
         {
             processes.resize(process_count);
         }

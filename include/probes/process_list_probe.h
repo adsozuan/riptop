@@ -31,7 +31,7 @@ namespace riptop
         bool                 UpdateProcessList(size_t update_interval_s);
         void                 SortProcessList();
         std::vector<Process> processes() { return processes_; };
-        static const size_t  PROCESSES_INITIAL_COUNT {300};
+        static const size_t  PROCESSES_INITIAL_COUNT {32};
 
       private:
         std::vector<Process> processes_;

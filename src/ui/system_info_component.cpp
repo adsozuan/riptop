@@ -22,15 +22,15 @@ ftxui::Element SystemInfoComponent::Render()
 
     // clang-format off
     auto usage_gauge = [](std::string name, float value) {
-        ftxui::Color::Palette256 gauge_color = Color::Green1;
+        auto gauge_color = Color::Green;
 
         if (value > 0.5)
         {
-            gauge_color = Color::Orange1;
+            gauge_color = Color::Yellow;
         }
         if (value > 0.75)
         {
-            gauge_color = Color::Red1;
+            gauge_color = Color::Red;
         }
         auto content = hbox(separatorEmpty(), text(name) | color(Color::Cyan3), text("["),
                             gauge(value) | color(gauge_color) | flex,

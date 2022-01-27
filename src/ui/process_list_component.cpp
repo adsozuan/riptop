@@ -9,7 +9,7 @@
 
 ProcessListComponent::ProcessListComponent(ProcessReceiver receiver) : receiver_(std::move(receiver))
 {
-    processes_.resize(300);
+    processes_.resize(32);
 }
 
 ftxui::Element ProcessListComponent::RenderProcesses()
@@ -30,9 +30,9 @@ ftxui::Element ProcessListComponent::RenderProcesses()
     Elements list;
     int      index {0};
 
-    for(auto& process : processes_)
+    for (auto& process : processes_)
     {
-        
+
         bool has_focus = (index++ == selected_);
 
         Decorator line_selector = nothing;
@@ -45,9 +45,7 @@ ftxui::Element ProcessListComponent::RenderProcesses()
         list.push_back(line);
     }
 
-    return vbox({header, separatorEmpty(), 
-        vbox(list) | vscroll_indicator | yframe
-        });
+    return vbox({header, separatorEmpty(), vbox(list) | vscroll_indicator | yframe});
 }
 
 bool ProcessListComponent::OnEvent(ftxui::Event event)
@@ -86,11 +84,11 @@ void ProcessListComponent::Format(const std::vector<ProcessInfo>& processes)
                         std::chrono::duration_cast<std::chrono::seconds>(std::chrono::milliseconds(process.up_time)),
                         process.exe_name));
 
-        if (index > process_count)
+        if (process_count >= processes_.size()) // more processes are incoming than available rooms
         {
             processes_.push_back(row);
         }
-        else
+        else // enough rooms for incoming processes
         {
             processes_[index] = row;
         }
