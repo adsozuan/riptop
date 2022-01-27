@@ -17,20 +17,19 @@ endif()
 
 # ------------------------------------------------------------------------------
 
-# --- Fetch concurrentqueue --------------------------------------------------------------
+# --- Fetch WIL --------------------------------------------------------------
 include(FetchContent)
 
 set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
 FetchContent_Declare(
-  concurrentqueue
-  GIT_REPOSITORY  https://github.com/cameron314/concurrentqueue
-  GIT_TAG v1.0.3
+  wil
+  GIT_REPOSITORY https://github.com/microsoft/wil 
 )
 
-FetchContent_GetProperties(concurrentqueue)
-if(NOT concurrentqueue_POPULATED)
-  FetchContent_Populate(concurrentqueue)
-  add_subdirectory(${concurrentqueue_SOURCE_DIR} ${concurrentqueue_BINARY_DIR} EXCLUDE_FROM_ALL)
+FetchContent_GetProperties(wil)
+if(NOT wil_POPULATED)
+  FetchContent_Populate(wil)
+  add_subdirectory(${wil_SOURCE_DIR} ${wil_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
 # ------------------------------------------------------------------------------
@@ -50,6 +49,8 @@ set_target_properties(probes PROPERTIES
 	ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 	LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 	)
+
+target_link_libraries(probes PRIVATE WIL::WIL)
 
 # utils library
 add_library(utils 
@@ -97,7 +98,6 @@ target_include_directories(riptop
 target_link_libraries(riptop
   PRIVATE ftxui::screen
   PRIVATE ftxui::component
-  PRIVATE concurrentqueue
   PRIVATE probes
   PRIVATE utils
   PRIVATE ui

@@ -22,6 +22,9 @@ namespace riptop
         ULONGLONG   disk_operations;
         DWORD       disk_usage;
         DWORD       tree_depth;
+
+        void                 UpdateProcessMemoryUsage();
+        void                 UpdateProcessUserName();
     };
 
     class ProcessListProbe
@@ -33,8 +36,6 @@ namespace riptop
         std::vector<Process> processes() { return processes_; };
         static const size_t  PROCESSES_INITIAL_COUNT {32};
 
-      private:
-        void                 UpdateProcessMemory(Process& process);
         std::vector<Process> processes_;
     };
 

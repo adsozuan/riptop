@@ -7,6 +7,8 @@
 #include <Psapi.h>
 #include <tchar.h>
 #include <tlhelp32.h>
+#include <wil/resource.h>
+#include <wil/token_helpers.h>
 
 riptop::ProcessListProbe::ProcessListProbe() { processes_.resize(PROCESSES_INITIAL_COUNT); }
 
@@ -56,7 +58,8 @@ bool riptop::ProcessListProbe::UpdateProcessList(size_t update_interval_s)
         process.handle  = OpenProcess(PROCESS_ALL_ACCESS, FALSE, process_entry.th32ProcessID);
         if (process.handle)
         {
-            UpdateProcessMemory(process);
+            process.UpdateProcessMemoryUsage();
+            process.UpdateProcessUserName();
 
             if (index >= processes_.size())
             {
@@ -78,15 +81,50 @@ bool riptop::ProcessListProbe::UpdateProcessList(size_t update_interval_s)
     return (TRUE);
 }
 
-void riptop::ProcessListProbe::UpdateProcessMemory(riptop::Process& process)
+void riptop::Process::UpdateProcessMemoryUsage()
 {
     PROCESS_MEMORY_COUNTERS proc_mem_counters;
-    if (GetProcessMemoryInfo(process.handle, &proc_mem_counters, sizeof(proc_mem_counters)))
+
+    if (GetProcessMemoryInfo(handle, &proc_mem_counters, sizeof(proc_mem_counters)))
     {
-        process.used_memory = static_cast<uint64_t>(proc_mem_counters.WorkingSetSize);
+        used_memory = static_cast<uint64_t>(proc_mem_counters.WorkingSetSize);
     }
 }
 
+void riptop::Process::UpdateProcessUserName()
+{
+    wil::unique_handle process_token_handle;
+
+    if (OpenProcessToken(handle, TOKEN_READ, &process_token_handle))
+    {
+        DWORD ReturnLength;
+
+        GetTokenInformation(process_token_handle.get(), TokenUser, 0, 0, &ReturnLength);
+
+        if (GetLastError() == ERROR_INSUFFICIENT_BUFFER)
+        {
+
+            auto token_user = wil::get_token_information<TOKEN_USER>();
+
+            if (GetTokenInformation(process_token_handle.get(), TokenUser, token_user.get(), ReturnLength,
+                                    &ReturnLength))
+            {
+                // if(token_user) {
+                SID_NAME_USE NameUse;
+                DWORD        NameLength = 256;
+                TCHAR        DomainName[MAX_PATH];
+                DWORD        DomainLength  = MAX_PATH;
+                std::string  user_name_local     = "";
+                LPSTR        user_name_out = strdup(user_name_local.c_str());
+
+                LookupAccountSid(0, token_user.get()->User.Sid, user_name_out, &NameLength, DomainName, &DomainLength,
+                                 &NameUse);
+
+                user_name = user_name_out;
+            }
+        }
+    }
+};
 void riptop::print_error(std::string msg)
 {
     DWORD  eNum;
