@@ -48,12 +48,13 @@ ftxui::Element SystemInfoComponent::Render()
         });
     };
 
-    auto tasks_number = std::format("{} total", dynamic_data_.total_tasks_count);
 
     auto system_info_area = [&]() {
+		auto tasks_number = std::format("{} total", dynamic_data_.total_tasks_count);
+		auto total_memory = std::format("{} GB", riptop::to_mega_bytes(static_data_.total_memory) / 1000);
         return vbox({
             hbox(separatorEmpty(), text("Tasks: ") | color(Color::Cyan3), text(tasks_number)),  //"290 total, 5 running")),
-            hbox(separatorEmpty(), text("Size: ") | color(Color::Cyan3), text(riptop::format_memory(static_data_.total_memory))),
+            hbox(separatorEmpty(), text("Size: ") | color(Color::Cyan3), text(total_memory)),
             hbox(separatorEmpty(), text("Uptime: ") | color(Color::Cyan3), text(dynamic_data_.up_time)),
             hbox(separatorEmpty(), text("Proc: ") | color(Color::Cyan3), text(static_data_.processor_name)),
         });
@@ -69,7 +70,4 @@ ftxui::Element SystemInfoComponent::Render()
     // clang-format on
 }
 
-bool SystemInfoComponent::OnEvent(ftxui::Event event)
-{
-    return ftxui::ComponentBase::OnEvent(event);
-}
+bool SystemInfoComponent::OnEvent(ftxui::Event event) { return ftxui::ComponentBase::OnEvent(event); }
