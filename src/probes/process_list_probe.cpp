@@ -4,12 +4,11 @@
 #include <format>
 #include <iostream>
 #include <sstream>
+#include <Psapi.h>
 #include <tchar.h>
 #include <tlhelp32.h>
 
-riptop::ProcessListProbe::ProcessListProbe() { 
-    processes_.resize(PROCESSES_INITIAL_COUNT); 
-}
+riptop::ProcessListProbe::ProcessListProbe() { processes_.resize(PROCESSES_INITIAL_COUNT); }
 
 void riptop::ProcessListProbe::SortProcessList() {}
 
@@ -55,7 +54,10 @@ bool riptop::ProcessListProbe::UpdateProcessList(size_t update_interval_s)
         // Retrieve the priority class.
         dwPriorityClass = 0;
         process.handle  = OpenProcess(PROCESS_ALL_ACCESS, FALSE, process_entry.th32ProcessID);
+        if (process.handle)
         {
+            UpdateProcessMemory(process);
+
             if (index >= processes_.size())
             {
                 processes_.push_back(process);
@@ -74,6 +76,15 @@ bool riptop::ProcessListProbe::UpdateProcessList(size_t update_interval_s)
 
     CloseHandle(process_snap);
     return (TRUE);
+}
+
+void riptop::ProcessListProbe::UpdateProcessMemory(riptop::Process& process)
+{
+    PROCESS_MEMORY_COUNTERS proc_mem_counters;
+    if (GetProcessMemoryInfo(process.handle, &proc_mem_counters, sizeof(proc_mem_counters)))
+    {
+        process.used_memory = static_cast<uint64_t>(proc_mem_counters.WorkingSetSize);
+    }
 }
 
 void riptop::print_error(std::string msg)

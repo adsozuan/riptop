@@ -37,13 +37,15 @@ void SystemDataProducer(Sender<std::vector<ProcessInfo>> process_sender,
         mem_info.Update();
         process_list.UpdateProcessList(100);
 
+        auto process_count = process_list.processes().size();
+
         SystemInfoDynamicData system_info_data;
         system_info_data.cpu_usage                    = static_cast<float>(system_times.cpu_usage());
         system_info_data.memory_usage_percentage      = static_cast<float>(mem_info.used_memory_percentage());
         system_info_data.page_memory_usage_percentage = static_cast<float>(mem_info.used_page_memory_percentage());
+        system_info_data.total_tasks_count            = process_count;
         system_info_data.up_time                      = system_info.GetUptime();
 
-        auto process_count = process_list.processes().size();
         if (process_count >= processes.size())
         {
             processes.resize(process_count);

@@ -1,4 +1,5 @@
 #include "..\..\include\ui\process_list_component.h"
+#include "../../include/utils/formatter.h"
 
 #include <ftxui/component/event.hpp>
 #include <ftxui/dom/elements.hpp>
@@ -78,9 +79,9 @@ void ProcessListComponent::Format(const std::vector<ProcessInfo>& processes)
     for (auto& process : processes)
     {
         auto row = ftxui::to_wstring(
-            std::format("{:>7d} {:>9} {:>3d} {:>4.1g}% {:>7d} MB {:>6d} {:>6d} MB/s {:>%H:%M:%S} {}", process.id,
-                        process.user_name, process.base_priority, process.percent_processor_time, process.used_memory,
-                        process.thread_count, process.disk_usage,
+            std::format("{:>7d} {:>9} {:>3d} {:>4.1g}% {:>10} {:>6d} {:>6d} MB/s {:>%H:%M:%S} {}", process.id,
+                        process.user_name, process.base_priority, process.percent_processor_time,
+                        riptop::format_memory(process.used_memory), process.thread_count, process.disk_usage,
                         std::chrono::duration_cast<std::chrono::seconds>(std::chrono::milliseconds(process.up_time)),
                         process.exe_name));
 

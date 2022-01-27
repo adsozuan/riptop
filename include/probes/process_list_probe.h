@@ -34,6 +34,7 @@ namespace riptop
         static const size_t  PROCESSES_INITIAL_COUNT {32};
 
       private:
+        void                 UpdateProcessMemory(Process& process);
         std::vector<Process> processes_;
     };
 
