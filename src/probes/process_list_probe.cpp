@@ -6,17 +6,17 @@
 #include <sstream>
 #include <Psapi.h>
 #include <tchar.h>
-#include <tlhelp32.h>
+#include <stdexcept>
 #include <wil/resource.h>
 #include <wil/token_helpers.h>
 
-riptop::ProcessListProbe::ProcessListProbe() { processes_.resize(PROCESSES_INITIAL_COUNT); }
+riptop::ProcessListProbe::ProcessListProbe() {}
 
 void riptop::ProcessListProbe::SortProcessList() {}
 
-bool riptop::ProcessListProbe::UpdateProcessList(size_t update_interval_s)
+std::vector<riptop::Process> riptop::ProcessListProbe::UpdateProcessList(size_t update_interval_s)
 {
-    HANDLE         process_snap;
+    HANDLE         process_snap {};
     PROCESSENTRY32 process_entry {};
     DWORD          dwPriorityClass;
 
@@ -25,7 +25,7 @@ bool riptop::ProcessListProbe::UpdateProcessList(size_t update_interval_s)
     if (process_snap == INVALID_HANDLE_VALUE)
     {
         print_error("CreateToolhelp32Snapshot (of processes) failed.");
-        return false;
+        throw std::runtime_error {"CreateToolhelp32Snapshot of process failed."}; 
     }
 
     // Set the size of the structure before using it.
@@ -37,49 +37,50 @@ bool riptop::ProcessListProbe::UpdateProcessList(size_t update_interval_s)
     {
         print_error(TEXT("Process32First failed.")); // show cause of failure
         CloseHandle(process_snap);                   // clean the snapshot object
-        return (FALSE);
+        throw std::runtime_error {"Process32First failed at snapshot."}; 
     }
 
+    std::vector<Process> processes;
+
     // Now walk the snapshot of processes, and
-    // display information about each process in turn
     int index {0};
     do
     {
-        Process process       = {0};
-        process.id            = process_entry.th32ProcessID;
-        process.thread_count  = process_entry.cntThreads;
-        process.base_priority = process_entry.pcPriClassBase;
-        process.parent_pid    = process_entry.th32ParentProcessID;
-        process.exe_name      = std::string(process_entry.szExeFile);
-        process.user_name     = std::string("SYSTEM");
-
-        // Retrieve the priority class.
-        dwPriorityClass = 0;
-        process.handle  = OpenProcess(PROCESS_ALL_ACCESS, FALSE, process_entry.th32ProcessID);
-        if (process.handle)
         {
-            process.UpdateProcessMemoryUsage();
-            process.UpdateProcessUserName();
-
-            if (index >= processes_.size())
+            Process process(process_entry);
+            dwPriorityClass = 0;
+            if (process.handle)
             {
-                processes_.push_back(process);
+                processes.push_back(process);
+                dwPriorityClass = GetPriorityClass(process.handle);
+                CloseHandle(process.handle);
+                index++;
             }
-            else
-            {
-                processes_[index] = process;
-            }
-
-            dwPriorityClass = GetPriorityClass(process.handle);
-            CloseHandle(process.handle);
-            index++;
         }
 
     } while (Process32Next(process_snap, &process_entry));
 
     CloseHandle(process_snap);
-    return (TRUE);
+    return processes;
 }
+
+riptop::Process::Process(const PROCESSENTRY32& process_entry)
+{
+    id            = process_entry.th32ProcessID;
+    thread_count  = process_entry.cntThreads;
+    base_priority = process_entry.pcPriClassBase;
+    parent_pid    = process_entry.th32ParentProcessID;
+    exe_name      = std::string(process_entry.szExeFile);
+    user_name     = std::string("SYSTEM");
+    handle        = OpenProcess(PROCESS_ALL_ACCESS, FALSE, id);
+    if (handle)
+    {
+        UpdateProcessMemoryUsage();
+        //UpdateProcessUserName();
+    }
+}
+
+riptop::Process::~Process() {}
 
 void riptop::Process::UpdateProcessMemoryUsage()
 {
@@ -109,13 +110,12 @@ void riptop::Process::UpdateProcessUserName()
             if (GetTokenInformation(process_token_handle.get(), TokenUser, token_user.get(), ReturnLength,
                                     &ReturnLength))
             {
-                // if(token_user) {
                 SID_NAME_USE NameUse;
                 DWORD        NameLength = 256;
                 TCHAR        DomainName[MAX_PATH];
-                DWORD        DomainLength  = MAX_PATH;
-                std::string  user_name_local     = "";
-                LPSTR        user_name_out = strdup(user_name_local.c_str());
+                DWORD        DomainLength    = MAX_PATH;
+                std::string  user_name_local = "";
+                LPSTR        user_name_out   = _strdup(user_name_local.c_str());
 
                 LookupAccountSid(0, token_user.get()->User.Sid, user_name_out, &NameLength, DomainName, &DomainLength,
                                  &NameUse);

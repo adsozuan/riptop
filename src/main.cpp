@@ -14,45 +14,34 @@
 #include <chrono>
 #include <thread>
 
-
 using namespace riptop;
 using namespace ftxui;
 
 void SystemDataProducer(Sender<std::vector<ProcessInfo>> process_sender,
-                        Sender<SystemInfoDynamicData> system_info_sender, 
-                        SystemInfoProbe system_info,
-                        MemoryUsageProbe mem_info, 
-                        ScreenInteractive* screen)
+                        Sender<SystemInfoDynamicData> system_info_sender, SystemInfoProbe system_info,
+                        MemoryUsageProbe mem_info, ScreenInteractive* screen)
 {
     SystemTimesProbe         system_times;
     ProcessListProbe         process_list;
-    std::vector<ProcessInfo> processes(32);
 
     while (true)
     {
         using namespace std::chrono_literals;
+        std::vector<ProcessInfo> processes;
 
         system_info.Update();
         system_times.UpdateCpuUsage();
         mem_info.Update();
-        process_list.UpdateProcessList(100);
-
-        auto process_count = process_list.processes().size();
+        auto incomings = process_list.UpdateProcessList(100);
 
         SystemInfoDynamicData system_info_data;
         system_info_data.cpu_usage                    = static_cast<float>(system_times.cpu_usage());
         system_info_data.memory_usage_percentage      = static_cast<float>(mem_info.used_memory_percentage());
         system_info_data.page_memory_usage_percentage = static_cast<float>(mem_info.used_page_memory_percentage());
-        system_info_data.total_tasks_count            = process_count;
+        system_info_data.total_tasks_count            = incomings.size();
         system_info_data.up_time                      = system_info.GetUptime();
 
-        if (process_count >= processes.size())
-        {
-            processes.resize(process_count);
-        }
-
-        int index {0};
-        for (auto& probe : process_list.processes())
+        for (auto& probe : incomings)
         {
             ProcessInfo info;
             info.id                     = probe.id;
@@ -63,13 +52,11 @@ void SystemDataProducer(Sender<std::vector<ProcessInfo>> process_sender,
             info.thread_count           = probe.thread_count;
             info.disk_usage             = probe.disk_usage;
             info.exe_name               = probe.exe_name;
-            processes[index]            = info;
-            index++;
+            processes.push_back(info);
         }
 
         system_info_sender->Send(system_info_data);
-        std::vector<ProcessInfo> processes_msg(processes);
-        process_sender->Send(processes_msg);
+        process_sender->Send(processes);
 
         std::this_thread::sleep_for(500ms);
         screen->PostEvent(Event::Custom);
@@ -96,10 +83,8 @@ int main(void)
     auto component = std::make_shared<MainComponent>(std::move(process_receiver), system_static_data,
                                                      std::move(system_data_receiver));
 
-    std::thread system_data_producer_thread(SystemDataProducer, 
-                                            std::move(process_sender),
-                                            std::move(system_data_sender), 
-                                            std::move(system_info), std::move(mem_info),
+    std::thread system_data_producer_thread(SystemDataProducer, std::move(process_sender),
+                                            std::move(system_data_sender), std::move(system_info), std::move(mem_info),
                                             &screen);
 
     screen.Loop(component);

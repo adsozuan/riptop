@@ -2,6 +2,7 @@
 
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/receiver.hpp>
+#include <ftxui/dom/elements.hpp>
 
 struct ProcessInfo
 {
@@ -28,9 +29,10 @@ class ProcessListComponent : public ftxui::ComponentBase
     int selected() { return selected_; }
 
   private:
-    void Format(const std::vector<ProcessInfo>& processes);
+    std::vector<std::wstring> Format(const std::vector<ProcessInfo>& processes);
 
-    ProcessReceiver           receiver_;
-    std::vector<std::wstring> processes_;
-    int                       selected_ {0};
+    ProcessReceiver receiver_;
+    std::vector<std::wstring> current_processes_;
+    int    selected_ {0};
+    size_t process_count_ {0};
 };
