@@ -17,7 +17,7 @@
 using namespace riptop;
 using namespace ftxui;
 
-void SystemDataProducer(Sender<std::vector<ProcessInfo>> process_sender,
+void ProduceSystemData(Sender<std::vector<ProcessInfo>> process_sender,
                         Sender<SystemInfoDynamicData> system_info_sender, SystemInfoProbe system_info,
                         MemoryUsageProbe mem_info, ScreenInteractive* screen)
 {
@@ -83,12 +83,12 @@ int main(void)
     auto component = std::make_shared<MainComponent>(std::move(process_receiver), system_static_data,
                                                      std::move(system_data_receiver));
 
-    std::thread system_data_producer_thread(SystemDataProducer, std::move(process_sender),
+    std::jthread system_data_producer_thread(ProduceSystemData, std::move(process_sender),
                                             std::move(system_data_sender), std::move(system_info), std::move(mem_info),
                                             &screen);
 
     screen.Loop(component);
-    system_data_producer_thread.join();
+    //system_data_producer_thread.join();
 
     return 0;
 }
