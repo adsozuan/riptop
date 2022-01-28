@@ -54,8 +54,8 @@ target_link_libraries(probes PRIVATE WIL::WIL)
 
 # utils library
 add_library(utils 
-	"utils/formatter.cpp" 
-	"../include/utils/formatter.h")
+	"utils/utils.cpp" 
+	"../include/utils/utils.h")
 set_target_properties(utils PROPERTIES 
 	LINKER_LANGUAGE CXX
 	ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib

@@ -16,10 +16,8 @@ namespace riptop
     {
       public:
         void   UpdateCpuUsage();
+        TimesData AcquireSystemTimes();
         double cpu_usage() const { return cpu_usage_; }
-
-      private:
-        uint64_t SubtractTimes(const FILETIME* a, const FILETIME* b);
 
       private:
         double    cpu_usage_ {0.0};

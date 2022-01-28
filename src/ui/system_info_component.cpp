@@ -1,5 +1,5 @@
 #include "../../include/ui/system_info_component.h"
-#include "../../include/utils/formatter.h"
+#include "../../include/utils/utils.h"
 
 #include "ftxui/dom/elements.hpp"
 #include "ftxui/component/event.hpp"
@@ -50,10 +50,10 @@ ftxui::Element SystemInfoComponent::Render()
 
 
     auto system_info_area = [&]() {
-		auto tasks_number = std::format("{} total", dynamic_data_.total_tasks_count);
+		auto tasks_number = std::format("{} total, {} runnings", dynamic_data_.total_tasks_count, dynamic_data_.runnning_tasks_count);
 		auto total_memory = std::format("{} GB", riptop::to_mega_bytes(static_data_.total_memory) / 1000);
         return vbox({
-            hbox(separatorEmpty(), text("Tasks: ") | color(Color::Cyan3), text(tasks_number)),  //"290 total, 5 running")),
+            hbox(separatorEmpty(), text("Tasks: ") | color(Color::Cyan3), text(tasks_number)),  
             hbox(separatorEmpty(), text("Size: ") | color(Color::Cyan3), text(total_memory)),
             hbox(separatorEmpty(), text("Uptime: ") | color(Color::Cyan3), text(dynamic_data_.up_time)),
             hbox(separatorEmpty(), text("Proc: ") | color(Color::Cyan3), text(static_data_.processor_name)),

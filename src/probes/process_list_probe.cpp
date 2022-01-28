@@ -1,4 +1,5 @@
-#include "..\..\include\probes\process_list_probe.h"
+#include "../../include/probes/process_list_probe.h"
+#include "../../include/utils/utils.h"
 
 #include <chrono>
 #include <format>
@@ -6,15 +7,18 @@
 #include <sstream>
 #include <Psapi.h>
 #include <tchar.h>
+#include <thread>
 #include <stdexcept>
 #include <wil/resource.h>
 #include <wil/token_helpers.h>
+#include "../../include/probes/system_times_probe.h"
 
 riptop::ProcessListProbe::ProcessListProbe() {}
 
 void riptop::ProcessListProbe::SortProcessList() {}
 
-std::vector<riptop::Process> riptop::ProcessListProbe::UpdateProcessList(size_t update_interval_s)
+std::vector<riptop::Process> riptop::ProcessListProbe::UpdateProcessList(size_t            update_interval_ms,
+                                                                         SystemTimesProbe& system_times_probe)
 {
     HANDLE         process_snap {};
     PROCESSENTRY32 process_entry {};
@@ -25,7 +29,7 @@ std::vector<riptop::Process> riptop::ProcessListProbe::UpdateProcessList(size_t 
     if (process_snap == INVALID_HANDLE_VALUE)
     {
         print_error("CreateToolhelp32Snapshot (of processes) failed.");
-        throw std::runtime_error {"CreateToolhelp32Snapshot of process failed."}; 
+        throw std::runtime_error {"CreateToolhelp32Snapshot of process failed."};
     }
 
     // Set the size of the structure before using it.
@@ -37,7 +41,7 @@ std::vector<riptop::Process> riptop::ProcessListProbe::UpdateProcessList(size_t 
     {
         print_error(TEXT("Process32First failed.")); // show cause of failure
         CloseHandle(process_snap);                   // clean the snapshot object
-        throw std::runtime_error {"Process32First failed at snapshot."}; 
+        throw std::runtime_error {"Process32First failed at snapshot."};
     }
 
     std::vector<Process> processes;
@@ -53,7 +57,6 @@ std::vector<riptop::Process> riptop::ProcessListProbe::UpdateProcessList(size_t 
             {
                 processes.push_back(process);
                 dwPriorityClass = GetPriorityClass(process.handle);
-                CloseHandle(process.handle);
                 index++;
             }
         }
@@ -61,6 +64,37 @@ std::vector<riptop::Process> riptop::ProcessListProbe::UpdateProcessList(size_t 
     } while (Process32Next(process_snap, &process_entry));
 
     CloseHandle(process_snap);
+
+    auto previous_system_times = system_times_probe.AcquireSystemTimes();
+
+    for (auto& process : processes)
+    {
+        process.AcquireCpuUsage();
+        process.AcquireDiskUsage();
+    }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(update_interval_ms));
+
+    auto system_times       = system_times_probe.AcquireSystemTimes();
+    auto system_kernel_diff = SubtractTimes(&system_times.kernel_time, &previous_system_times.kernel_time);
+    auto system_user_diff   = SubtractTimes(&system_times.user_time, &previous_system_times.user_time);
+
+    running_process_count_ = 0;
+
+    for (auto& process : processes)
+    {
+        process.CalculateCpuUsage(system_kernel_diff, system_user_diff);
+        if (process.percent_processor_time >= 0.01)
+        {
+            running_process_count_++;
+        }
+        process.AcquireUpTime();
+        process.CalculateDiskUsage(update_interval_ms);
+        CloseHandle(process.handle);
+        process.handle = 0;
+    }
+
+    process_count_ = processes.size();
     return processes;
 }
 
@@ -75,14 +109,14 @@ riptop::Process::Process(const PROCESSENTRY32& process_entry)
     handle        = OpenProcess(PROCESS_ALL_ACCESS, FALSE, id);
     if (handle)
     {
-        UpdateProcessMemoryUsage();
-        //UpdateProcessUserName();
+        AcquireMemoryUsage();
+        UpdateProcessUserName();
     }
 }
 
 riptop::Process::~Process() {}
 
-void riptop::Process::UpdateProcessMemoryUsage()
+void riptop::Process::AcquireMemoryUsage()
 {
     PROCESS_MEMORY_COUNTERS proc_mem_counters;
 
@@ -125,6 +159,67 @@ void riptop::Process::UpdateProcessUserName()
         }
     }
 };
+
+riptop::ProcessTimes riptop::Process::AcquireCpuUsage()
+{
+    if (handle)
+    {
+        GetProcessTimes(handle, &process_times_.CreationTime, &process_times_.ExitTime, &process_times_.KernelTime,
+                        &process_times_.UserTime);
+    }
+    return process_times_;
+}
+
+void riptop::Process::CalculateCpuUsage(uint64_t system_kernel_diff, uint64_t system_user_diff)
+{
+    auto     previous_times   = process_times_;
+    auto     current_times    = AcquireCpuUsage();
+    uint64_t proc_kernel_diff = SubtractTimes(&current_times.KernelTime, &previous_times.KernelTime);
+    uint64_t proc_user_diff   = SubtractTimes(&current_times.UserTime, &previous_times.UserTime);
+
+    uint64_t total_system = system_kernel_diff + system_user_diff;
+    uint64_t total_proc   = proc_kernel_diff + proc_user_diff;
+
+    if (total_system > 0)
+    {
+        percent_processor_time =
+            static_cast<double>(((100.0 * static_cast<double>(total_proc) / static_cast<double>(total_system))));
+    }
+}
+
+void riptop::Process::AcquireDiskUsage()
+{
+    if (handle)
+    {
+        IO_COUNTERS io_counters;
+        if (GetProcessIoCounters(handle, &io_counters))
+        {
+            disk_operations_prev = io_counters.ReadOperationCount + io_counters.WriteTransferCount;
+        }
+    }
+}
+
+void riptop::Process::CalculateDiskUsage(size_t update_interval_ms)
+{
+    if (handle)
+    {
+        IO_COUNTERS io_counters;
+        if (GetProcessIoCounters(handle, &io_counters))
+        {
+            disk_operations = io_counters.ReadOperationCount + io_counters.WriteTransferCount;
+            disk_usage      = (disk_operations - disk_operations_prev) * (1000) / update_interval_ms; 
+        }
+    }
+}
+
+void riptop::Process::AcquireUpTime()
+{
+    FILETIME system_time;
+    GetSystemTimeAsFileTime(&system_time);
+
+    up_time = SubtractTimes(&system_time, &process_times_.CreationTime) / 10000;
+}
+
 void riptop::print_error(std::string msg)
 {
     DWORD  eNum;

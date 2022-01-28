@@ -1,5 +1,5 @@
 #include "../../include/probes/system_info_probe.h"
-#include "../../include/utils/formatter.h"
+#include "../../include/utils/utils.h"
 
 #include <chrono>
 #include <format>

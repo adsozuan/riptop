@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <windows.h>
 
 namespace riptop
 {
@@ -13,6 +14,8 @@ namespace riptop
 
     constexpr auto to_mega_bytes(int64_t x) { return x / 1048576; }
 
-    std::string format_memory(int64_t memory);
+    std::string FormatMemory(int64_t memory);
+
+    uint64_t SubtractTimes(const FILETIME* a, const FILETIME* b);
 
 } // namespace riptop

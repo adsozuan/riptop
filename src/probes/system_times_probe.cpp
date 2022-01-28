@@ -1,4 +1,5 @@
-#include "..\..\include\probes\system_times_probe.h"
+#include "../../include/probes/system_times_probe.h"
+#include "../../include/utils/utils.h"
 
 #include <algorithm>
 #include <thread>
@@ -25,16 +26,9 @@ void riptop::SystemTimesProbe::UpdateCpuUsage()
     }
 }
 
-uint64_t riptop::SystemTimesProbe::SubtractTimes(const FILETIME* a, const FILETIME* b)
+riptop::TimesData riptop::SystemTimesProbe::AcquireSystemTimes()
 {
-    LARGE_INTEGER la {};
-    LARGE_INTEGER lb {};
-
-    la.LowPart  = a->dwLowDateTime;
-    la.HighPart = b->dwHighDateTime;
-
-    lb.LowPart  = b->dwLowDateTime;
-    lb.HighPart = b->dwHighDateTime;
-
-    return la.QuadPart - lb.QuadPart;
-}
+    TimesData times {};
+    GetSystemTimes(&times.idle_time, &times.kernel_time, &times.user_time);
+    return times;
+};

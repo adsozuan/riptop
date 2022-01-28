@@ -3,7 +3,6 @@
 #include "../include/probes/system_times_probe.h"
 #include "../include/probes/process_list_probe.h"
 #include "../include/probes/memory_usage_probe.h"
-#include "../include/utils/formatter.h"
 
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/screen/screen.hpp>
@@ -32,13 +31,14 @@ void ProduceSystemData(Sender<std::vector<ProcessInfo>> process_sender,
         system_info.Update();
         system_times.UpdateCpuUsage();
         mem_info.Update();
-        auto incomings = process_list.UpdateProcessList(100);
+        auto incomings = process_list.UpdateProcessList(100, system_times);
 
         SystemInfoDynamicData system_info_data;
         system_info_data.cpu_usage                    = static_cast<float>(system_times.cpu_usage());
         system_info_data.memory_usage_percentage      = static_cast<float>(mem_info.used_memory_percentage());
         system_info_data.page_memory_usage_percentage = static_cast<float>(mem_info.used_page_memory_percentage());
         system_info_data.total_tasks_count            = incomings.size();
+        system_info_data.runnning_tasks_count         = process_list.running_process_count();
         system_info_data.up_time                      = system_info.GetUptime();
 
         for (auto& probe : incomings)

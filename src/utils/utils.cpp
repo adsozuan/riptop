@@ -1,5 +1,5 @@
 
-#include "../../include/utils/formatter.h"
+#include "../../include/utils/utils.h"
 
 #include <cmath>
 #include <cstdint>
@@ -7,7 +7,7 @@
 #include <array>
 #include <format>
 
-std::string riptop::format_memory(int64_t memory)
+std::string riptop::FormatMemory(int64_t memory)
 {
     std::array<int64_t, 6>     dividers = {PETABYTE, TERABYTE, GIGABYTE, MEGABYTE, KILOBYTE, 1};
     std::array<std::string, 6> units    = {"PB", "TB", "GB", "MB", "KB", "B"};
@@ -29,4 +29,18 @@ std::string riptop::format_memory(int64_t memory)
         index++;
     }
     return oss.str();
+}
+
+uint64_t riptop::SubtractTimes(const FILETIME* a, const FILETIME* b)
+{
+    LARGE_INTEGER la {};
+    LARGE_INTEGER lb {};
+
+    la.LowPart  = a->dwLowDateTime;
+    la.HighPart = b->dwHighDateTime;
+
+    lb.LowPart  = b->dwLowDateTime;
+    lb.HighPart = b->dwHighDateTime;
+
+    return la.QuadPart - lb.QuadPart;
 }
