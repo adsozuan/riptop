@@ -1,5 +1,5 @@
-#include "..\..\include\ui\process_list_component.h"
-#include "../../include/utils/utils.h"
+#include "ui/process_list_component.h"
+#include "utils/utils.h"
 
 #include <ftxui/component/event.hpp>
 #include <ftxui/dom/elements.hpp>
@@ -7,6 +7,8 @@
 #include <ftxui/screen/string.hpp>
 
 #include <algorithm>
+
+using namespace riptop;
 
 ProcessListComponent::ProcessListComponent(ProcessReceiver receiver) : receiver_(std::move(receiver)) {}
 

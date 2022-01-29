@@ -1,5 +1,5 @@
-#include "../../include/probes/system_info_probe.h"
-#include "../../include/utils/utils.h"
+#include "probes/system_info_probe.h"
+#include "utils/utils.h"
 
 #include <chrono>
 #include <format>

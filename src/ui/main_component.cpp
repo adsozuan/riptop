@@ -1,9 +1,11 @@
-#include "../../include/ui/main_component.h"
+#include "ui/main_component.h"
 
 #include <ftxui/component/event.hpp>
 #include <ftxui/component/component.hpp>
 #include <ftxui/dom/elements.hpp>
 #include <ftxui/screen/string.hpp>
+
+using namespace riptop;
 
 MainComponent::MainComponent(ProcessReceiver process_receiver, SystemInfoStaticData system_info_static_data,
                              SystemInfoDataReceiver system_data_receiver)

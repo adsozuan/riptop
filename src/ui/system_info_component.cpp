@@ -1,10 +1,12 @@
-#include "../../include/ui/system_info_component.h"
-#include "../../include/utils/utils.h"
+#include "ui/system_info_component.h"
+#include "utils/utils.h"
 
 #include "ftxui/dom/elements.hpp"
 #include "ftxui/component/event.hpp"
 
 #include <format>
+
+using namespace riptop;
 
 SystemInfoComponent::SystemInfoComponent(SystemInfoStaticData static_data, SystemInfoDataReceiver receiver)
     : static_data_(static_data), receiver_(std::move(receiver))

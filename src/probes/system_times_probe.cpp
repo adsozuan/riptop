@@ -1,5 +1,5 @@
-#include "../../include/probes/system_times_probe.h"
-#include "../../include/utils/utils.h"
+#include "probes/system_times_probe.h"
+#include "utils/utils.h"
 
 #include <algorithm>
 #include <thread>

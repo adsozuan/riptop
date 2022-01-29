@@ -6,16 +6,19 @@
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/receiver.hpp>
 
-class MainComponent : public ftxui::ComponentBase
+namespace riptop
 {
-  public:
-    MainComponent(ProcessReceiver process_receiver, SystemInfoStaticData system_info_static_data,
-                  SystemInfoDataReceiver system_data_receiver);
-    ftxui::Element Render() override;
-    bool           OnEvent(ftxui::Event event) override;
+    class MainComponent : public ftxui::ComponentBase
+    {
+      public:
+        MainComponent(ProcessReceiver process_receiver, SystemInfoStaticData system_info_static_data,
+                      SystemInfoDataReceiver system_data_receiver);
+        ftxui::Element Render() override;
+        bool           OnEvent(ftxui::Event event) override;
 
-  private:
-    std::string                           computer_name_;
-    std::shared_ptr<ProcessListComponent> process_table_ = nullptr;
-    std::shared_ptr<SystemInfoComponent>  system_info_   = nullptr;
-};
+      private:
+        std::string                           computer_name_;
+        std::shared_ptr<ProcessListComponent> process_table_ = nullptr;
+        std::shared_ptr<SystemInfoComponent>  system_info_   = nullptr;
+    };
+} // namespace riptop

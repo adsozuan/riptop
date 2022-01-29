@@ -1,5 +1,6 @@
-#include "../../include/probes/process_list_probe.h"
-#include "../../include/utils/utils.h"
+#include "probes/process_list_probe.h"
+#include "probes/system_times_probe.h"
+#include "utils/utils.h"
 
 #include <chrono>
 #include <format>
@@ -11,7 +12,6 @@
 #include <stdexcept>
 #include <wil/resource.h>
 #include <wil/token_helpers.h>
-#include "../../include/probes/system_times_probe.h"
 
 riptop::ProcessListProbe::ProcessListProbe() {}
 

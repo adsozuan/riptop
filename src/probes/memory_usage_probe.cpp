@@ -1,4 +1,4 @@
-#include "../../include/probes/memory_usage_probe.h"
+#include "probes/memory_usage_probe.h"
 
 using namespace riptop;
 
