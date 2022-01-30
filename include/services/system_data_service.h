@@ -1,8 +1,5 @@
 #pragma once
 
-#include "ui/system_info_component.h"
-#include "ui/process_list_component.h"
-
 #include "probes/system_info_probe.h"
 #include "probes/system_times_probe.h"
 #include "probes/process_list_probe.h"
@@ -11,9 +8,9 @@
 
 namespace riptop
 {
-    //struct ProcessInfo;
-    //struct SystemInfoDynamicData;
-    //struct SystemInfoStaticData;
+    struct ProcessInfo;
+    struct SystemInfoDynamicData;
+    struct SystemInfoStaticData;
 
     class SystemDataService
     {

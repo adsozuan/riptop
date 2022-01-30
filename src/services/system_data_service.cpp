@@ -1,5 +1,9 @@
 #include "services/system_data_service.h"
 
+#include "probes/system_info_probe.h"
+#include "probes/system_times_probe.h"
+#include "probes/process_list_probe.h"
+#include "probes/memory_usage_probe.h"
 #include "ui/system_info_component.h"
 #include "ui/process_list_component.h"
 

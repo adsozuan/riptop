@@ -4,7 +4,6 @@ add_library(services
     "../../include/services/system_data_service.h" 
 	"system_data_service.cpp")
 target_link_libraries(services
-  PRIVATE ui
   PRIVATE ftxui::dom
   PRIVATE ftxui::component 
 )
