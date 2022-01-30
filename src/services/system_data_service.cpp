@@ -3,18 +3,15 @@
 #include "ui/system_info_component.h"
 #include "ui/process_list_component.h"
 
-
 using namespace riptop;
 
-void SystemDataService::Acquire(std::vector<ProcessInfo>& processes_infos,
-                                        SystemInfoDynamicData&    system_info_data)
+void SystemDataService::Acquire(std::vector<ProcessInfo>& processes_infos, SystemInfoDynamicData& system_info_data)
 {
     system_info_.Update();
     system_times_.UpdateCpuUsage();
     mem_info_.Update();
     auto incomings = process_list_.UpdateProcessList(100, system_times_);
 
-    SystemInfoDynamicData system_info_data;
     system_info_data.cpu_usage                    = static_cast<float>(system_times_.cpu_usage());
     system_info_data.memory_usage_percentage      = static_cast<float>(mem_info_.used_memory_percentage());
     system_info_data.page_memory_usage_percentage = static_cast<float>(mem_info_.used_page_memory_percentage());
