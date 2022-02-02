@@ -19,8 +19,8 @@ void SystemDataService::Acquire(std::vector<ProcessInfo>& processes_infos, Syste
     system_info_data.cpu_usage                    = static_cast<float>(system_times_.cpu_usage());
     system_info_data.memory_usage_percentage      = static_cast<float>(mem_info_.used_memory_percentage());
     system_info_data.page_memory_usage_percentage = static_cast<float>(mem_info_.used_page_memory_percentage());
-    system_info_data.total_tasks_count            = incomings.size();
-    system_info_data.runnning_tasks_count         = process_list_.running_process_count();
+    system_info_data.total_tasks_count            = static_cast<int32_t>(incomings.size());
+    system_info_data.runnning_tasks_count         = static_cast<int32_t>(process_list_.running_process_count());
     system_info_data.up_time                      = system_info_.GetUptime();
 
     for (auto& probe : incomings)

@@ -207,7 +207,7 @@ void riptop::Process::CalculateDiskUsage(size_t update_interval_ms)
         if (GetProcessIoCounters(handle, &io_counters))
         {
             disk_operations = io_counters.ReadOperationCount + io_counters.WriteTransferCount;
-            disk_usage      = (disk_operations - disk_operations_prev) * (1000) / update_interval_ms; 
+            disk_usage      = static_cast<DWORD>((disk_operations - disk_operations_prev) * (1000) / update_interval_ms); 
         }
     }
 }
