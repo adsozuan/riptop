@@ -2,10 +2,14 @@
 # services library
 add_library(services
     "../../include/services/system_data_service.h" 
-	"system_data_service.cpp")
+    "../../include/services/acquisition_thread.h" 
+	"system_data_service.cpp" 
+	"acquisition_thread.cpp")
+
 target_link_libraries(services
   PRIVATE ftxui::dom
   PRIVATE ftxui::component 
+  PRIVATE ui
 )
 target_include_directories(services
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include

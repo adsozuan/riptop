@@ -1,3 +1,4 @@
+#pragma once
 
 #include "ui/main_component.h"
 
@@ -13,13 +14,13 @@ namespace riptop
       public:
         Ui() = delete;
         Ui(SystemInfoStaticData system_static_data, SystemInfoDataReceiver system_data_receiver,
-               ProcessReceiver process_receiver);
+           ProcessReceiver process_receiver);
         void Run();
         void PostEvent();
 
       private:
         std::shared_ptr<MainComponent> main_component_;
-        ftxui::ScreenInteractive*       screen_;
+        ftxui::ScreenInteractive*      screen_;
     };
 
 } // namespace riptop
