@@ -66,7 +66,7 @@ bool ProcessListComponent::OnEvent(ftxui::Event event)
     {
         return true;
     }
-    int size  = process_count_ <= 0 ? 0 : process_count_ - 1;
+    int size  = static_cast<int>(process_count_ <= 0 ? 0 : process_count_ - 1);
     selected_ = std::ranges::clamp(selected_, 0, size);
 
     return ftxui::ComponentBase::OnEvent(event);

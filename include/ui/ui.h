@@ -23,4 +23,20 @@ namespace riptop
         ftxui::ScreenInteractive*      screen_;
     };
 
+    struct ProcessesChannel
+    {
+        ProcessReceiver rx;
+        ProcessSender   tx;
+
+        ProcessesChannel();
+    };
+
+    struct SystemInfoDynChannel
+    {
+        SystemInfoDataReceiver rx;
+        SystemInfoDataSender   tx;
+
+        SystemInfoDynChannel();
+    };
+
 } // namespace riptop

@@ -20,6 +20,7 @@ namespace riptop
     };
 
     using ProcessReceiver = ftxui::Receiver<std::vector<ProcessInfo>>;
+    using ProcessSender = ftxui::Sender<std::vector<ProcessInfo>>;
 
     class ProcessListComponent : public ftxui::ComponentBase
     {

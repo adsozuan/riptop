@@ -17,6 +17,19 @@ cmake ..
 cmake --build .
 ```
 
+## Architecture overview
+
+```shell
+main -->-->-----UI thread ----------->------------------- Receives probes data -->-- Render -->-- Handle Inputs ---
+        \                                                        |     |
+         \                                                       ^     ^
+          \                                  system_info_channel |     | processes_channel
+           \                                                     ^     ^  
+            \                                                     \   /
+             `--Acquisition thread -->-- Acquire all probes -->-- Send probes data to UI --------------------------
+
+```
+
 ## External dependencies
 
 * [FTXUI library](https://github.com/ArthurSonzogni/ftxui) for terminal UI.

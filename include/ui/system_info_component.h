@@ -23,6 +23,7 @@ namespace riptop
     };
 
     using SystemInfoDataReceiver = ftxui::Receiver<SystemInfoDynamicData>;
+    using SystemInfoDataSender = ftxui::Sender<SystemInfoDynamicData>;
 
     class SystemInfoComponent : public ftxui::ComponentBase
     {

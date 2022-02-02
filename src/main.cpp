@@ -2,8 +2,6 @@
 #include "services/system_data_service.h"
 #include "services/acquisition_thread.h"
 
-#include <ftxui/component/receiver.hpp>
-
 #include <thread>
 
 using namespace riptop;
@@ -12,12 +10,13 @@ using namespace ftxui;
 
 /******************************************************************************************************************
 
-           
-main -->-->-----UI thread -->---------------------------- Receives probes data -->-- Render -->-- Handle Inputs -
-          \                                                      |
-           \                                                     ^
-            \                                                     \
-             `--acquisition thread -->-- Acquire all probes -->-- Send probes data to UI ----------------------
+main -->-->-----UI thread ----------->------------------- Receives probes data -->-- Render -->-- Handle Inputs ---
+        \                                                        |     |
+         \                                                       ^     ^
+          \                                  system_info_channel |     | processes_channel
+           \                                                     ^     ^  
+            \                                                     \   /
+             `--Acquisition thread -->-- Acquire all probes -->-- Send probes data to UI --------------------------
 
 *******************************************************************************************************************/
 int main(void)
@@ -25,17 +24,14 @@ int main(void)
     SystemDataService system_data_service;
     SystemInfoStaticData system_static_data = system_data_service.GetStaticData();
 
-    auto process_receiver = MakeReceiver<std::vector<ProcessInfo>>();
-    auto processes_data_sender   = process_receiver->MakeSender();
-
-    auto system_data_receiver = MakeReceiver<SystemInfoDynamicData>();
-    auto system_data_sender   = system_data_receiver->MakeSender();
+    SystemInfoDynChannel system_info_channel;
+    ProcessesChannel processes_channel;
 
 
-    Ui main_ui(system_static_data, std::move(system_data_receiver), std::move(process_receiver));
+    Ui main_ui(system_static_data, std::move(system_info_channel.rx), std::move(processes_channel.rx));
 
-    std::jthread acquisition_thread(AcquisitionThread(),std::move(processes_data_sender),
-                                             std::move(system_data_sender), &system_data_service, &main_ui);
+    std::jthread acquisition_thread(AcquisitionThread(),std::move(processes_channel.tx),
+                                             std::move(system_info_channel.tx), &system_data_service, &main_ui);
 
 
     main_ui.Run();
