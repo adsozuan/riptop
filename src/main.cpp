@@ -1,5 +1,5 @@
-#include "../include/ui/main_component.h"
-#include "../include/services/system_data_service.h"
+#include "ui/ui.h"
+#include "services/system_data_service.h"
 
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/screen/screen.hpp>
@@ -13,7 +13,7 @@ using namespace ftxui;
 
 void ProduceSystemData(Sender<std::vector<ProcessInfo>> process_sender,
                        Sender<SystemInfoDynamicData> system_info_sender, SystemDataService* system_data_service,
-                       ScreenInteractive* screen)
+                       Ui* main_ui)
 {
 
     while (true)
@@ -28,14 +28,12 @@ void ProduceSystemData(Sender<std::vector<ProcessInfo>> process_sender,
         process_sender->Send(processes);
 
         std::this_thread::sleep_for(500ms);
-        screen->PostEvent(Event::Custom);
+        main_ui->PostEvent();
     }
 }
 
 int main(void)
 {
-    auto screen = ScreenInteractive::FitComponent();
-
     auto process_receiver = MakeReceiver<std::vector<ProcessInfo>>();
     auto process_sender   = process_receiver->MakeSender();
 
@@ -46,14 +44,13 @@ int main(void)
 
     SystemInfoStaticData system_static_data = system_data_service.GetStaticData();
 
-    auto component = std::make_shared<MainComponent>(std::move(process_receiver), system_static_data,
-                                                     std::move(system_data_receiver));
+    Ui main_ui(system_static_data, std::move(system_data_receiver), std::move(process_receiver));
+
 
     std::jthread system_data_producer_thread(ProduceSystemData, std::move(process_sender),
-                                             std::move(system_data_sender), &system_data_service, &screen);
+                                             std::move(system_data_sender), &system_data_service, &main_ui);
 
-    screen.Loop(component);
-    // system_data_producer_thread.join();
+    main_ui.Run();
 
     return 0;
 }

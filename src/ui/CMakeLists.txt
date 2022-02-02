@@ -19,12 +19,14 @@ endif()
 
 # ui library
 add_library(ui 
+	"../../include/ui/ui.h" 
 	"../../include/ui/main_component.h" 
 	"../../include/ui/process_list_component.h"
 	"../../include/ui/system_info_component.h"
 	"process_list_component.cpp" 
 	"main_component.cpp" 
-	"system_info_component.cpp")
+	"system_info_component.cpp" 
+	"ui.cpp")
 target_link_libraries(ui
   PRIVATE ftxui::screen
   PRIVATE ftxui::dom
