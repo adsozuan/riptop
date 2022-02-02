@@ -2,11 +2,8 @@
 #include "services/system_data_service.h"
 #include "services/acquisition_thread.h"
 
-#include <ftxui/component/screen_interactive.hpp>
-#include <ftxui/screen/screen.hpp>
 #include <ftxui/component/receiver.hpp>
 
-#include <chrono>
 #include <thread>
 
 using namespace riptop;
