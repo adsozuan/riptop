@@ -2,6 +2,7 @@
 #include "probes/system_times_probe.h"
 #include "utils/utils.h"
 
+#include <algorithm>
 #include <chrono>
 #include <format>
 #include <iostream>
@@ -15,7 +16,7 @@
 
 riptop::ProcessListProbe::ProcessListProbe() {}
 
-void riptop::ProcessListProbe::SortProcessList() {}
+
 
 std::vector<riptop::Process> riptop::ProcessListProbe::UpdateProcessList(size_t            update_interval_ms,
                                                                          SystemTimesProbe& system_times_probe)
@@ -95,6 +96,7 @@ std::vector<riptop::Process> riptop::ProcessListProbe::UpdateProcessList(size_t 
     }
 
     process_count_ = processes.size();
+
     return processes;
 }
 
@@ -207,7 +209,7 @@ void riptop::Process::CalculateDiskUsage(size_t update_interval_ms)
         if (GetProcessIoCounters(handle, &io_counters))
         {
             disk_operations = io_counters.ReadOperationCount + io_counters.WriteTransferCount;
-            disk_usage      = static_cast<DWORD>((disk_operations - disk_operations_prev) * (1000) / update_interval_ms); 
+            disk_usage = static_cast<DWORD>((disk_operations - disk_operations_prev) * (1000) / update_interval_ms);
         }
     }
 }

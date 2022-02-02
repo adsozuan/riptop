@@ -7,10 +7,15 @@
 #include <ftxui/screen/string.hpp>
 
 #include <algorithm>
+#include <map>
 
 using namespace riptop;
 
 ProcessListComponent::ProcessListComponent(ProcessReceiver receiver) : receiver_(std::move(receiver)) {}
+
+bool IsAscending() { return false;
+
+}
 
 ftxui::Element ProcessListComponent::RenderProcesses()
 {
@@ -22,14 +27,40 @@ ftxui::Element ProcessListComponent::RenderProcesses()
     {
         std::vector<ProcessInfo> incoming_infos;
         receiver_->Receive(&incoming_infos);
-        process_count_       = incoming_infos.size();
+        process_count_ = incoming_infos.size();
+        SortProcessList(&incoming_infos, sorting_, sort_order_);
         processes_to_display = Format(incoming_infos);
     }
     if (!processes_to_display.empty())
         current_processes_ = processes_to_display;
 
-    auto r = std::format("{:>7} {:>9} {:>3} {:>4}% {:>10} {:>6} {:>11} {:>8} {}", "PID", "USER", "PRI", "CPU", "MEM",
-                         "THREAD", "DISK", "TIME", "PROCESS");
+    std::map<ProcessSorting, std::string> headers {
+        {ProcessSorting::Pid, "PID(i)"},
+        {ProcessSorting::User, "USER(u)"},
+        {ProcessSorting::Priority, "PRI"},
+        {ProcessSorting::CpuPercent, "CPU(c)"},
+        {ProcessSorting::Memory, "MEM(m)"},
+        {ProcessSorting::Thread, "THREAD"},
+        {ProcessSorting::DiskUsage, "DISK"},
+        {ProcessSorting::UpTime, "TIME"},
+        {ProcessSorting::ProcessName, "PROCESS(p)"},
+    };
+
+    //for (auto& col : headers)
+    //{
+    //    if (col.first == sorting_)
+    //    {
+    //        col.second.append("/\\");
+    //    }
+    //    else
+    //    {
+    //        if (col.second.find("/\\") > 1)
+    //            col.second.replace(col.second.find("/\\"), 2, "");
+    //    }
+    //}
+
+    auto r      = std::format("{:>7} {:>11} {:>8} {:>10}% {:>10} {:>6} {:>11} {:>8} {}", "PID(i)", "USER(u)", "PRI",
+                         "CPU(c)", "MEM(m)", "THREAD", "DISK", "TIME", "PROCESS(p)");
     auto header = text(r) | bgcolor(Color::Green);
 
     Elements list;
@@ -53,6 +84,7 @@ ftxui::Element ProcessListComponent::RenderProcesses()
 
 bool ProcessListComponent::OnEvent(ftxui::Event event)
 {
+    // SELECTION
     auto old_selected = selected_;
     if (event == ftxui::Event::ArrowUp || event == ftxui::Event::Character("k"))
     {
@@ -66,10 +98,104 @@ bool ProcessListComponent::OnEvent(ftxui::Event event)
     {
         return true;
     }
+
+    // SORTING
+    if (event == ftxui::Event::Character("c"))
+    {
+        sorting_ = ProcessSorting::CpuPercent;
+    }
+    if (event == ftxui::Event::Character("m"))
+    {
+        sorting_ = ProcessSorting::Memory;
+    }
+    if (event == ftxui::Event::Character("i"))
+    {
+        sorting_ = ProcessSorting::Pid;
+    }
+    if (event == ftxui::Event::Character("u"))
+    {
+        sorting_ = ProcessSorting::User;
+    }
+    if (event == ftxui::Event::Character("t"))
+    {
+        sorting_ = ProcessSorting::UpTime;
+    }
+    if (event == ftxui::Event::Character("p"))
+    {
+        sorting_ = ProcessSorting::ProcessName;
+    }
+
     int size  = static_cast<int>(process_count_ <= 0 ? 0 : process_count_ - 1);
     selected_ = std::ranges::clamp(selected_, 0, size);
 
     return ftxui::ComponentBase::OnEvent(event);
+}
+void riptop::ProcessListComponent::SortProcessList(std::vector<ProcessInfo>* processes_to_sort,
+                                                   ProcessSorting sort_type, SortOrder sort_order)
+{
+    switch (sort_type)
+    {
+        case ProcessSorting::CpuPercent:
+            std::sort(processes_to_sort->begin(), processes_to_sort->end(), [=](const auto& lhs, const auto& rhs) {
+                if (sort_order == SortOrder::Descending)
+                {
+                    return lhs.percent_processor_time > rhs.percent_processor_time;
+                }
+                else
+                {
+                    return lhs.percent_processor_time < rhs.percent_processor_time;
+                }
+            });
+            break;
+        case ProcessSorting::Memory:
+            std::sort(processes_to_sort->begin(), processes_to_sort->end(), [=](const auto& lhs, const auto& rhs) {
+                if (sort_order == SortOrder::Descending)
+                {
+                    return lhs.used_memory > rhs.used_memory;
+                }
+                else
+                {
+                    return lhs.used_memory < rhs.used_memory;
+                }
+            });
+            break;
+        case ProcessSorting::Pid:
+            std::sort(processes_to_sort->begin(), processes_to_sort->end(), [=](const auto& lhs, const auto& rhs) {
+                if (sort_order == SortOrder::Descending)
+                {
+                    return lhs.id > rhs.id;
+                }
+                else
+                {
+                    return lhs.used_memory < rhs.used_memory;
+                }
+            });
+            break;
+        case ProcessSorting::ProcessName:
+            std::sort(processes_to_sort->begin(), processes_to_sort->end(), [=](const auto& lhs, const auto& rhs) {
+                if (sort_order == SortOrder::Descending)
+                {
+                    return lhs.exe_name > rhs.exe_name;
+                }
+                else
+                {
+                    return lhs.exe_name < rhs.exe_name;
+                }
+            });
+            break;
+        case ProcessSorting::User:
+            std::sort(processes_to_sort->begin(), processes_to_sort->end(), [=](const auto& lhs, const auto& rhs) {
+                if (sort_order == SortOrder::Descending)
+                {
+                    return lhs.user_name > rhs.user_name;
+                }
+                else
+                {
+                    return lhs.user_name < rhs.user_name;
+                }
+            });
+            break;
+    }
 }
 
 std::vector<std::wstring> ProcessListComponent::Format(const std::vector<ProcessInfo>& processes)
@@ -77,6 +203,7 @@ std::vector<std::wstring> ProcessListComponent::Format(const std::vector<Process
     std::vector<std::wstring> lines;
 
     int index {0};
+
     for (auto& process : processes)
     {
         auto row = ftxui::to_wstring(

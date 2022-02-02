@@ -6,6 +6,25 @@
 
 namespace riptop
 {
+    enum class ProcessSorting
+    {
+        CpuPercent,
+        Memory,
+        Pid,
+        ProcessName,
+        User,
+        DiskUsage,
+        UpTime,
+        Priority,
+        Thread,
+    };
+
+    enum class SortOrder
+    {
+        Ascending,
+        Descending
+    };
+
     struct ProcessInfo
     {
         int64_t     id {};
@@ -32,11 +51,14 @@ namespace riptop
         int selected() { return selected_; }
 
       private:
+        void SortProcessList(std::vector<ProcessInfo>* processes_to_sort, ProcessSorting sort_type, SortOrder sort_order);
         std::vector<std::wstring> Format(const std::vector<ProcessInfo>& processes);
 
         ProcessReceiver           receiver_;
         std::vector<std::wstring> current_processes_;
         int                       selected_ {0};
         size_t                    process_count_ {0};
+        ProcessSorting            sorting_ {};
+        SortOrder                 sort_order_ {};
     };
 } // namespace riptop
