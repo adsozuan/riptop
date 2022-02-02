@@ -12,13 +12,24 @@
 using namespace riptop;
 using namespace ftxui;
 
+
+/******************************************************************************************************************
+
+           
+main -->-->-----UI thread -->---------------------------- Receives probes data -->-- Render -->-- Handle Inputs -
+          \                                                      |
+           \                                                     ^
+            \                                                     \
+             `--acquisition thread -->-- Acquire all probes -->-- Send probes data to UI ----------------------
+
+*******************************************************************************************************************/
 int main(void)
 {
     SystemDataService system_data_service;
     SystemInfoStaticData system_static_data = system_data_service.GetStaticData();
 
     auto process_receiver = MakeReceiver<std::vector<ProcessInfo>>();
-    auto process_sender   = process_receiver->MakeSender();
+    auto processes_data_sender   = process_receiver->MakeSender();
 
     auto system_data_receiver = MakeReceiver<SystemInfoDynamicData>();
     auto system_data_sender   = system_data_receiver->MakeSender();
@@ -26,9 +37,9 @@ int main(void)
 
     Ui main_ui(system_static_data, std::move(system_data_receiver), std::move(process_receiver));
 
-
-    std::jthread system_data_producer_thread(AcquisitionThread(),std::move(process_sender),
+    std::jthread acquisition_thread(AcquisitionThread(),std::move(processes_data_sender),
                                              std::move(system_data_sender), &system_data_service, &main_ui);
+
 
     main_ui.Run();
 

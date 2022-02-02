@@ -1,10 +1,12 @@
 # riptop
 
+A simple `htop` clone to accustom myself to modern C++.
 
-`htop` clone using [FTXUI library](https://github.com/ArthurSonzogni/ftxui) and modern C++.
+![riptop_basic](doc/riptop_basic.png)
 
+## Operating systems
 
-Windows 10 x64 only.
+* Windows 10 x64 only.
 
 
 ## Build instructions:
@@ -15,4 +17,9 @@ cmake ..
 cmake --build .
 ```
 
+## External dependencies
+
+* [FTXUI library](https://github.com/ArthurSonzogni/ftxui) for terminal UI.
+* [WIL (Windows Implementation Libraries)](https://github.com/microsoft/wil) for accessing Windows API in a modern safe C++ way.
+* [Catch2](https://github.com/catchorg/Catch2) for unit tests.
 
