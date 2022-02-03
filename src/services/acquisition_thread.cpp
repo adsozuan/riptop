@@ -12,11 +12,11 @@
 using namespace riptop;
 using namespace ftxui;
 
-void riptop::AcquisitionThread::operator()(Sender<std::vector<ProcessInfo>> process_sender,
-                                           Sender<SystemInfoDynamicData>    system_info_sender,
+void riptop::AcquisitionThread::operator()(std::atomic<bool>* quit, Sender<std::vector<ProcessInfo>> process_sender,
+                                           Sender<SystemInfoDynamicData> system_info_sender,
                                            SystemDataService* system_data_service, Ui* main_ui)
 {
-    while (true)
+    while (!quit->load())
     {
         using namespace std::chrono_literals;
         std::vector<ProcessInfo> processes;

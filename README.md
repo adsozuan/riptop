@@ -12,6 +12,8 @@ A simple `htop` clone to accustom myself to modern C++.
 
 Run `riptop.exe`.
 
+Press 'q' for exiting.
+
 ### Move in process list
 - Up or 'k' key for going up.
 - Down or 'j' key for going down.

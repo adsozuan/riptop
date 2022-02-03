@@ -7,9 +7,9 @@
 
 using namespace riptop;
 
-MainComponent::MainComponent(ProcessReceiver process_receiver, SystemInfoStaticData system_info_static_data,
-                             SystemInfoDataReceiver system_data_receiver)
-    : computer_name_(system_info_static_data.computer_name)
+MainComponent::MainComponent(std::atomic<bool>* quit, ProcessReceiver process_receiver,
+                             SystemInfoStaticData system_info_static_data, SystemInfoDataReceiver system_data_receiver)
+    : computer_name_(system_info_static_data.computer_name), should_quit_(quit)
 {
     process_table_ = std::make_shared<ProcessListComponent>(std::move(process_receiver));
     system_info_   = std::make_shared<SystemInfoComponent>(system_info_static_data, std::move(system_data_receiver));
@@ -25,14 +25,17 @@ ftxui::Element MainComponent::Render()
 
     process_table_->TakeFocus();
 
-    return vbox(
-        {
-            title , 
-			separatorEmpty(), 
-			system_info_->Render() | notflex, 
-			separatorEmpty(), 
-			process_table_->RenderProcesses() | yflex
-        });
+    return vbox({title, separatorEmpty(), system_info_->Render() | notflex, separatorEmpty(),
+                 process_table_->RenderProcesses() | yflex});
 }
 
-bool MainComponent::OnEvent(ftxui::Event event) { return ComponentBase::OnEvent(event); }
+bool MainComponent::OnEvent(ftxui::Event event)
+{
+    if (event == ftxui::Event::Character("q"))
+    {
+        should_quit_->store(true); // for stoping Acquisition thread
+        OnQuit();                  // for stop Screen Loop
+    }
+
+    return ComponentBase::OnEvent(event);
+}

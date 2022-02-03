@@ -27,10 +27,11 @@ int main(void)
     SystemInfoDynChannel system_info_channel;
     ProcessesChannel processes_channel;
 
+    std::atomic<bool> quit(false);
 
-    Ui main_ui(system_static_data, std::move(system_info_channel.rx), std::move(processes_channel.rx));
+    Ui main_ui(&quit, system_static_data, std::move(system_info_channel.rx), std::move(processes_channel.rx));
 
-    std::jthread acquisition_thread(AcquisitionThread(),std::move(processes_channel.tx),
+    std::jthread acquisition_thread(AcquisitionThread(),&quit, std::move(processes_channel.tx),
                                              std::move(system_info_channel.tx), &system_data_service, &main_ui);
 
 

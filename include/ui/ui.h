@@ -13,7 +13,7 @@ namespace riptop
 
       public:
         Ui() = delete;
-        Ui(SystemInfoStaticData system_static_data, SystemInfoDataReceiver system_data_receiver,
+        Ui(std::atomic<bool>* quit, SystemInfoStaticData system_static_data, SystemInfoDataReceiver system_data_receiver,
            ProcessReceiver process_receiver);
         void Run();
         void PostEvent();

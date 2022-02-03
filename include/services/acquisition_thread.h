@@ -13,9 +13,9 @@ namespace riptop
     class AcquisitionThread
     {
       public:
-        void operator()(Sender<std::vector<ProcessInfo>> process_sender,
+        void operator()(std::atomic<bool>* quit, Sender<std::vector<ProcessInfo>> process_sender,
                         Sender<SystemInfoDynamicData> system_info_sender, SystemDataService* system_data_service,
                         Ui* main_ui);
     };
 
-}
+} // namespace riptop

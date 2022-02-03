@@ -2,11 +2,11 @@
 #include "ui/system_info_component.h"
 #include "ui/process_list_component.h"
 
-riptop::Ui::Ui(SystemInfoStaticData system_static_data, SystemInfoDataReceiver system_data_receiver,
+riptop::Ui::Ui(std::atomic<bool>* quit, SystemInfoStaticData system_static_data, SystemInfoDataReceiver system_data_receiver,
                ProcessReceiver process_receiver)
 {
 
-    main_component_ = std::make_shared<MainComponent>(std::move(process_receiver), system_static_data,
+    main_component_ = std::make_shared<MainComponent>(quit, std::move(process_receiver), system_static_data,
                                                       std::move(system_data_receiver));
 }
 
@@ -15,6 +15,8 @@ void riptop::Ui::Run()
 
     auto screen = ftxui::ScreenInteractive::FitComponent();
     screen_     = &screen;
+    main_component_->OnQuit = screen_->ExitLoopClosure();
+
     screen.Loop(main_component_);
 }
 
