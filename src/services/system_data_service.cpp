@@ -34,6 +34,7 @@ void SystemDataService::Acquire(std::vector<ProcessInfo>& processes_infos, Syste
         info.thread_count           = probe.thread_count;
         info.disk_usage             = probe.disk_usage;
         info.exe_name               = probe.exe_name;
+        info.up_time                = probe.up_time;
         processes_infos.push_back(info);
     }
 }
