@@ -8,6 +8,19 @@ A simple `htop` clone to accustom myself to modern C++.
 
 * Windows 10 x64 only.
 
+## Usage
+
+Run `riptop.exe`.
+
+### Move in process list
+- Up or 'k' key for going up.
+- Down or 'j' key for going down.
+
+### Column sorting
+- Press key in parenthesis in column name 
+- Press again to change sorting order
+
+
 
 ## Build instructions:
 ```powershell
