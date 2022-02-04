@@ -63,6 +63,7 @@ namespace riptop
         bool                      sort_order_ascending_ {};
         bool                      search_active_ {};
         std::wstring              search_string_ {};
+        int                       search_result_ {0};
     };
 
     class ColumnHeader

@@ -98,7 +98,7 @@ ftxui::Element ProcessListComponent::RenderProcesses()
         return vbox(search_area, header, vbox(list) | vscroll_indicator | yframe);
     }
 
-    return vbox(header, vbox(list) | vscroll_indicator | yframe);
+    return vbox(separatorEmpty(), header, vbox(list) | vscroll_indicator | yframe);
 }
 
 bool ProcessListComponent::OnEvent(ftxui::Event event)
@@ -125,15 +125,11 @@ bool ProcessListComponent::OnEvent(ftxui::Event event)
         }
     }
 
-    int size  = static_cast<int>(process_count_ <= 0 ? 0 : process_count_ - 1);
-    selected_ = std::ranges::clamp(selected_, 0, size);
-
     return ftxui::ComponentBase::OnEvent(event);
 }
 
 void riptop::ProcessListComponent::HandleNavigation(const ftxui::Event& event)
 {
-
     if (event == ftxui::Event::ArrowUp || event == ftxui::Event::Character("k"))
     {
         selected_--;
@@ -150,6 +146,9 @@ void riptop::ProcessListComponent::HandleNavigation(const ftxui::Event& event)
     {
         selected_ = process_count_ - 1;
     }
+
+    int size  = static_cast<int>(process_count_ <= 0 ? 0 : process_count_ - 1);
+    selected_ = std::ranges::clamp(selected_, 0, size);
 }
 
 void riptop::ProcessListComponent::SelectColumnSorting(const ftxui::Event& event)
@@ -213,6 +212,7 @@ void riptop::ProcessListComponent::HandleSearchInput(const ftxui::Event& event)
             search_string_.pop_back();
     }
 }
+
 void riptop::ProcessListComponent::HandleSearchActivation(const ftxui::Event& event)
 {
     if (event == ftxui::Event::Character("/"))
@@ -236,9 +236,11 @@ void riptop::ProcessListComponent::Search()
     });
     if (it != current_processes_.end())
     {
-        selected_ = std::distance(current_processes_.begin(), it);
+        search_result_ = std::distance(current_processes_.begin(), it);
+        selected_      = search_result_;
     }
 }
+
 void riptop::ProcessListComponent::SortProcessList(std::vector<ProcessInfo>* processes_to_sort)
 {
     switch (sorting_)
