@@ -117,22 +117,7 @@ bool ProcessListComponent::OnEvent(ftxui::Event event)
     {
         // process list navigation
         auto old_selected = selected_;
-        if (event == ftxui::Event::ArrowUp || event == ftxui::Event::Character("k"))
-        {
-            selected_--;
-        }
-        if (event == ftxui::Event::ArrowDown || event == ftxui::Event::Character("j"))
-        {
-            selected_++;
-        }
-        if (event == ftxui::Event::Home)
-        {
-            selected_ = 0;
-        }
-        if (event == ftxui::Event::End)
-        {
-            selected_ = process_count_ - 1;
-        }
+        HandleNavigation(event);
         if (selected_ != old_selected)
         {
             return true;
@@ -215,6 +200,26 @@ bool ProcessListComponent::OnEvent(ftxui::Event event)
     selected_ = std::ranges::clamp(selected_, 0, size);
 
     return ftxui::ComponentBase::OnEvent(event);
+}
+
+void riptop::ProcessListComponent::HandleNavigation(const ftxui::Event& event) {
+
+        if (event == ftxui::Event::ArrowUp || event == ftxui::Event::Character("k"))
+        {
+            selected_--;
+        }
+        if (event == ftxui::Event::ArrowDown || event == ftxui::Event::Character("j"))
+        {
+            selected_++;
+        }
+        if (event == ftxui::Event::Home)
+        {
+            selected_ = 0;
+        }
+        if (event == ftxui::Event::End)
+        {
+            selected_ = process_count_ - 1;
+        }
 }
 
 void riptop::ProcessListComponent::SortProcessList(std::vector<ProcessInfo>* processes_to_sort)

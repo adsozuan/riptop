@@ -49,6 +49,7 @@ namespace riptop
       private:
         void                      SortProcessList(std::vector<ProcessInfo>* processes_to_sort);
         std::vector<std::wstring> Format(const std::vector<ProcessInfo>& processes);
+        void                      HandleNavigation(const ftxui::Event& event);
 
         ProcessReceiver           receiver_;
         std::vector<std::wstring> current_processes_;
