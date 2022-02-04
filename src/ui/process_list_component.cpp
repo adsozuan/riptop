@@ -179,7 +179,7 @@ void riptop::ProcessListComponent::SortProcessList(std::vector<ProcessInfo>* pro
                 }
                 else
                 {
-                    return lhs.used_memory < rhs.used_memory;
+                    return lhs.id < rhs.id;
                 }
             });
             break;
