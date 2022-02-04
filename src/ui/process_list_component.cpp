@@ -103,19 +103,10 @@ ftxui::Element ProcessListComponent::RenderProcesses()
 
 bool ProcessListComponent::OnEvent(ftxui::Event event)
 {
-    // search
-    if (event == ftxui::Event::Character("/"))
-    {
-        search_active_ = true;
-    }
-    if (event == ftxui::Event::Escape)
-    {
-        search_active_ = false;
-    }
+    HandleSearchActivation(event);
 
     if (!search_active_)
     {
-        // process list navigation
         auto old_selected = selected_;
         HandleNavigation(event);
         if (selected_ != old_selected)
@@ -123,34 +114,14 @@ bool ProcessListComponent::OnEvent(ftxui::Event event)
             return true;
         }
 
-        // column sorting
         SelectColumnSorting(event);
     }
     else
     {
-        if (event.is_character() && event != ftxui::Event::Character("/"))
-        {
-            search_string_.append(ftxui::to_wstring(event.character()));
-        }
-        if (event == ftxui::Event::Backspace)
-        {
-            if (search_string_.size() >= 1)
-                search_string_.pop_back();
-        }
+        HandleSearchInput(event);
         if (event == ftxui::Event::Return)
         {
-            auto it =
-                std::find_if(current_processes_.begin(), current_processes_.end(), [this](const std::wstring& line) {
-                    if (line.find(search_string_) != std::string::npos)
-                    {
-                        return true;
-                    }
-                    return false;
-                });
-            if (it != current_processes_.end())
-            {
-                selected_ = std::distance(current_processes_.begin(), it);
-            }
+            Search();
         }
     }
 
@@ -229,6 +200,45 @@ void riptop::ProcessListComponent::SelectColumnSorting(const ftxui::Event& event
         sort_order_ascending_ = !sort_order_ascending_;
     }
 };
+
+void riptop::ProcessListComponent::HandleSearchInput(const ftxui::Event& event)
+{
+    if (event.is_character() && event != ftxui::Event::Character("/"))
+    {
+        search_string_.append(ftxui::to_wstring(event.character()));
+    }
+    if (event == ftxui::Event::Backspace)
+    {
+        if (search_string_.size() >= 1)
+            search_string_.pop_back();
+    }
+}
+void riptop::ProcessListComponent::HandleSearchActivation(const ftxui::Event& event)
+{
+    if (event == ftxui::Event::Character("/"))
+    {
+        search_active_ = true;
+    }
+    if (event == ftxui::Event::Escape)
+    {
+        search_active_ = false;
+    }
+}
+
+void riptop::ProcessListComponent::Search()
+{
+    auto it = std::find_if(current_processes_.begin(), current_processes_.end(), [this](const std::wstring& line) {
+        if (line.find(search_string_) != std::string::npos)
+        {
+            return true;
+        }
+        return false;
+    });
+    if (it != current_processes_.end())
+    {
+        selected_ = std::distance(current_processes_.begin(), it);
+    }
+}
 void riptop::ProcessListComponent::SortProcessList(std::vector<ProcessInfo>* processes_to_sort)
 {
     switch (sorting_)

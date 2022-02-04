@@ -51,6 +51,9 @@ namespace riptop
         std::vector<std::wstring> Format(const std::vector<ProcessInfo>& processes);
         void                      HandleNavigation(const ftxui::Event& event);
         void                      SelectColumnSorting(const ftxui::Event& event);
+        void                      HandleSearchActivation(const ftxui::Event& event);
+        void                      HandleSearchInput(const ftxui::Event& event);
+        void                      Search();
 
         ProcessReceiver           receiver_;
         std::vector<std::wstring> current_processes_;
