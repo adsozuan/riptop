@@ -19,6 +19,7 @@ namespace riptop
 
       private:
         std::atomic<bool>*                    should_quit_ {};
+        bool                                  show_help_ {};
         std::string                           computer_name_;
         std::shared_ptr<ProcessListComponent> process_table_ = nullptr;
         std::shared_ptr<SystemInfoComponent>  system_info_   = nullptr;
