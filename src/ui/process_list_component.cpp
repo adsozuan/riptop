@@ -51,8 +51,8 @@ ftxui::Element ProcessListComponent::RenderProcesses()
         current_processes_ = processes_to_display;
 
     // search widget
-    Component   search_input;
-    Element     search_area;
+    Component search_input;
+    Element   search_area;
     if (search_active_)
     {
         search_input = Input(&search_string_, "enter process name");
@@ -124,51 +124,7 @@ bool ProcessListComponent::OnEvent(ftxui::Event event)
         }
 
         // column sorting
-        if (event == ftxui::Event::Character("i"))
-        {
-            sorting_              = ProcessSorting::Pid;
-            sort_order_ascending_ = !sort_order_ascending_;
-        }
-        if (event == ftxui::Event::Character("u"))
-        {
-            sorting_              = ProcessSorting::User;
-            sort_order_ascending_ = !sort_order_ascending_;
-        }
-        if (event == ftxui::Event::Character("r"))
-        {
-            sorting_              = ProcessSorting::Priority;
-            sort_order_ascending_ = !sort_order_ascending_;
-        }
-        if (event == ftxui::Event::Character("c"))
-        {
-            sorting_              = ProcessSorting::CpuPercent;
-            sort_order_ascending_ = !sort_order_ascending_;
-        }
-        if (event == ftxui::Event::Character("m"))
-        {
-            sorting_              = ProcessSorting::Memory;
-            sort_order_ascending_ = !sort_order_ascending_;
-        }
-        if (event == ftxui::Event::Character("h"))
-        {
-            sorting_              = ProcessSorting::Thread;
-            sort_order_ascending_ = !sort_order_ascending_;
-        }
-        if (event == ftxui::Event::Character("d"))
-        {
-            sorting_              = ProcessSorting::DiskUsage;
-            sort_order_ascending_ = !sort_order_ascending_;
-        }
-        if (event == ftxui::Event::Character("t"))
-        {
-            sorting_              = ProcessSorting::UpTime;
-            sort_order_ascending_ = !sort_order_ascending_;
-        }
-        if (event == ftxui::Event::Character("p"))
-        {
-            sorting_              = ProcessSorting::ProcessName;
-            sort_order_ascending_ = !sort_order_ascending_;
-        }
+        SelectColumnSorting(event);
     }
     else
     {
@@ -178,17 +134,19 @@ bool ProcessListComponent::OnEvent(ftxui::Event event)
         }
         if (event == ftxui::Event::Backspace)
         {
-            search_string_.pop_back();
+            if (search_string_.size() >= 1)
+                search_string_.pop_back();
         }
         if (event == ftxui::Event::Return)
         {
-            auto it = std::find_if(current_processes_.begin(), current_processes_.end(), [this](const std::wstring& line) {
-                if (line.find(search_string_) != std::string::npos)
-                {
-                    return true;
-                }
-                return false;
-            });
+            auto it =
+                std::find_if(current_processes_.begin(), current_processes_.end(), [this](const std::wstring& line) {
+                    if (line.find(search_string_) != std::string::npos)
+                    {
+                        return true;
+                    }
+                    return false;
+                });
             if (it != current_processes_.end())
             {
                 selected_ = std::distance(current_processes_.begin(), it);
@@ -202,26 +160,75 @@ bool ProcessListComponent::OnEvent(ftxui::Event event)
     return ftxui::ComponentBase::OnEvent(event);
 }
 
-void riptop::ProcessListComponent::HandleNavigation(const ftxui::Event& event) {
+void riptop::ProcessListComponent::HandleNavigation(const ftxui::Event& event)
+{
 
-        if (event == ftxui::Event::ArrowUp || event == ftxui::Event::Character("k"))
-        {
-            selected_--;
-        }
-        if (event == ftxui::Event::ArrowDown || event == ftxui::Event::Character("j"))
-        {
-            selected_++;
-        }
-        if (event == ftxui::Event::Home)
-        {
-            selected_ = 0;
-        }
-        if (event == ftxui::Event::End)
-        {
-            selected_ = process_count_ - 1;
-        }
+    if (event == ftxui::Event::ArrowUp || event == ftxui::Event::Character("k"))
+    {
+        selected_--;
+    }
+    if (event == ftxui::Event::ArrowDown || event == ftxui::Event::Character("j"))
+    {
+        selected_++;
+    }
+    if (event == ftxui::Event::Home)
+    {
+        selected_ = 0;
+    }
+    if (event == ftxui::Event::End)
+    {
+        selected_ = process_count_ - 1;
+    }
 }
 
+void riptop::ProcessListComponent::SelectColumnSorting(const ftxui::Event& event)
+{
+    if (event == ftxui::Event::Character("i"))
+    {
+        sorting_              = ProcessSorting::Pid;
+        sort_order_ascending_ = !sort_order_ascending_;
+    }
+    if (event == ftxui::Event::Character("u"))
+    {
+        sorting_              = ProcessSorting::User;
+        sort_order_ascending_ = !sort_order_ascending_;
+    }
+    if (event == ftxui::Event::Character("r"))
+    {
+        sorting_              = ProcessSorting::Priority;
+        sort_order_ascending_ = !sort_order_ascending_;
+    }
+    if (event == ftxui::Event::Character("c"))
+    {
+        sorting_              = ProcessSorting::CpuPercent;
+        sort_order_ascending_ = !sort_order_ascending_;
+    }
+    if (event == ftxui::Event::Character("m"))
+    {
+        sorting_              = ProcessSorting::Memory;
+        sort_order_ascending_ = !sort_order_ascending_;
+    }
+    if (event == ftxui::Event::Character("h"))
+    {
+        sorting_              = ProcessSorting::Thread;
+        sort_order_ascending_ = !sort_order_ascending_;
+    }
+    if (event == ftxui::Event::Character("d"))
+    {
+        sorting_              = ProcessSorting::DiskUsage;
+        sort_order_ascending_ = !sort_order_ascending_;
+    }
+    if (event == ftxui::Event::Character("t"))
+    {
+        sorting_              = ProcessSorting::UpTime;
+        sort_order_ascending_ = !sort_order_ascending_;
+    }
+    if (event == ftxui::Event::Character("p"))
+    {
+        sorting_              = ProcessSorting::ProcessName;
+        sort_order_ascending_ = !sort_order_ascending_;
+    }
+};
 void riptop::ProcessListComponent::SortProcessList(std::vector<ProcessInfo>* processes_to_sort)
 {
     switch (sorting_)
