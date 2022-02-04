@@ -16,8 +16,6 @@
 
 riptop::ProcessListProbe::ProcessListProbe() {}
 
-
-
 std::vector<riptop::Process> riptop::ProcessListProbe::UpdateProcessList(size_t            update_interval_ms,
                                                                          SystemTimesProbe& system_times_probe)
 {
@@ -84,15 +82,18 @@ std::vector<riptop::Process> riptop::ProcessListProbe::UpdateProcessList(size_t 
 
     for (auto& process : processes)
     {
-        process.CalculateCpuUsage(system_kernel_diff, system_user_diff);
-        if (process.percent_processor_time >= 0.01)
+        if (process.handle)
         {
-            running_process_count_++;
+            process.CalculateCpuUsage(system_kernel_diff, system_user_diff);
+            if (process.percent_processor_time >= 0.01)
+            {
+                running_process_count_++;
+            }
+            process.AcquireUpTime();
+            process.CalculateDiskUsage(update_interval_ms);
+            CloseHandle(process.handle);
+            process.handle = 0;
         }
-        process.AcquireUpTime();
-        process.CalculateDiskUsage(update_interval_ms);
-        CloseHandle(process.handle);
-        process.handle = 0;
     }
 
     process_count_ = processes.size();
