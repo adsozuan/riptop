@@ -91,7 +91,7 @@ ftxui::Element ProcessListComponent::RenderProcesses()
 
 bool ProcessListComponent::OnEvent(ftxui::Event event)
 {
-    // line selection
+    // process list navigation
     auto old_selected = selected_;
     if (event == ftxui::Event::ArrowUp || event == ftxui::Event::Character("k"))
     {
@@ -100,6 +100,14 @@ bool ProcessListComponent::OnEvent(ftxui::Event event)
     if (event == ftxui::Event::ArrowDown || event == ftxui::Event::Character("j"))
     {
         selected_++;
+    }
+    if (event == ftxui::Event::Home)
+    {
+        selected_ = 0;
+    }
+    if (event == ftxui::Event::End)
+    {
+        selected_ = process_count_ - 1;
     }
     if (selected_ != old_selected)
     {

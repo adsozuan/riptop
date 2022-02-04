@@ -17,6 +17,8 @@ Press 'q' for exiting.
 ### Move in process list
 - Up or 'k' key for going up.
 - Down or 'j' key for going down.
+- Home go to start of list.
+- End go to end of list.
 
 ### Column sorting
 - Press key in parenthesis in column name 
