@@ -47,7 +47,7 @@ namespace riptop
         int selected() { return selected_; }
 
       private:
-        void SortProcessList(std::vector<ProcessInfo>* processes_to_sort);
+        void                      SortProcessList(std::vector<ProcessInfo>* processes_to_sort);
         std::vector<std::wstring> Format(const std::vector<ProcessInfo>& processes);
 
         ProcessReceiver           receiver_;
@@ -56,9 +56,11 @@ namespace riptop
         size_t                    process_count_ {0};
         ProcessSorting            sorting_ {};
         bool                      sort_order_ascending_ {};
+        bool                      search_active_ {};
+        std::wstring              search_string_ {};
     };
 
-    class ColumnHeader 
+    class ColumnHeader
     {
       public:
         ColumnHeader() = delete;

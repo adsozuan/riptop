@@ -31,10 +31,7 @@ riptop::ColumnHeader::ColumnHeader(std::string name, ProcessSorting sorting, Pro
     }
 };
 
-
-
 ProcessListComponent::ProcessListComponent(ProcessReceiver receiver) : receiver_(std::move(receiver)) {}
-
 
 ftxui::Element ProcessListComponent::RenderProcesses()
 {
@@ -52,6 +49,16 @@ ftxui::Element ProcessListComponent::RenderProcesses()
     }
     if (!processes_to_display.empty())
         current_processes_ = processes_to_display;
+
+    // search widget
+    Component   search_input;
+    Element     search_area;
+    if (search_active_)
+    {
+        search_input = Input(&search_string_, "enter process name");
+        search_area  = hbox(text("SEARCH: "), search_input->Render());
+        search_input->TakeFocus();
+    }
 
     // prepare columns headers
     ColumnHeader pid("PID", ProcessSorting::Pid, sorting_, sort_order_ascending_, "i", 5);
@@ -86,79 +93,122 @@ ftxui::Element ProcessListComponent::RenderProcesses()
 
     process_count_ = current_processes_.size();
 
+    if (search_active_)
+    {
+        return vbox(search_area, header, vbox(list) | vscroll_indicator | yframe);
+    }
+
     return vbox(header, vbox(list) | vscroll_indicator | yframe);
 }
 
 bool ProcessListComponent::OnEvent(ftxui::Event event)
 {
-    // process list navigation
-    auto old_selected = selected_;
-    if (event == ftxui::Event::ArrowUp || event == ftxui::Event::Character("k"))
+    // search
+    if (event == ftxui::Event::Character("/"))
     {
-        selected_--;
+        search_active_ = true;
     }
-    if (event == ftxui::Event::ArrowDown || event == ftxui::Event::Character("j"))
+    if (event == ftxui::Event::Escape)
     {
-        selected_++;
-    }
-    if (event == ftxui::Event::Home)
-    {
-        selected_ = 0;
-    }
-    if (event == ftxui::Event::End)
-    {
-        selected_ = process_count_ - 1;
-    }
-    if (selected_ != old_selected)
-    {
-        return true;
+        search_active_ = false;
     }
 
-    // column sorting
-    if (event == ftxui::Event::Character("i"))
+    if (!search_active_)
     {
-        sorting_              = ProcessSorting::Pid;
-        sort_order_ascending_ = !sort_order_ascending_;
+        // process list navigation
+        auto old_selected = selected_;
+        if (event == ftxui::Event::ArrowUp || event == ftxui::Event::Character("k"))
+        {
+            selected_--;
+        }
+        if (event == ftxui::Event::ArrowDown || event == ftxui::Event::Character("j"))
+        {
+            selected_++;
+        }
+        if (event == ftxui::Event::Home)
+        {
+            selected_ = 0;
+        }
+        if (event == ftxui::Event::End)
+        {
+            selected_ = process_count_ - 1;
+        }
+        if (selected_ != old_selected)
+        {
+            return true;
+        }
+
+        // column sorting
+        if (event == ftxui::Event::Character("i"))
+        {
+            sorting_              = ProcessSorting::Pid;
+            sort_order_ascending_ = !sort_order_ascending_;
+        }
+        if (event == ftxui::Event::Character("u"))
+        {
+            sorting_              = ProcessSorting::User;
+            sort_order_ascending_ = !sort_order_ascending_;
+        }
+        if (event == ftxui::Event::Character("r"))
+        {
+            sorting_              = ProcessSorting::Priority;
+            sort_order_ascending_ = !sort_order_ascending_;
+        }
+        if (event == ftxui::Event::Character("c"))
+        {
+            sorting_              = ProcessSorting::CpuPercent;
+            sort_order_ascending_ = !sort_order_ascending_;
+        }
+        if (event == ftxui::Event::Character("m"))
+        {
+            sorting_              = ProcessSorting::Memory;
+            sort_order_ascending_ = !sort_order_ascending_;
+        }
+        if (event == ftxui::Event::Character("h"))
+        {
+            sorting_              = ProcessSorting::Thread;
+            sort_order_ascending_ = !sort_order_ascending_;
+        }
+        if (event == ftxui::Event::Character("d"))
+        {
+            sorting_              = ProcessSorting::DiskUsage;
+            sort_order_ascending_ = !sort_order_ascending_;
+        }
+        if (event == ftxui::Event::Character("t"))
+        {
+            sorting_              = ProcessSorting::UpTime;
+            sort_order_ascending_ = !sort_order_ascending_;
+        }
+        if (event == ftxui::Event::Character("p"))
+        {
+            sorting_              = ProcessSorting::ProcessName;
+            sort_order_ascending_ = !sort_order_ascending_;
+        }
     }
-    if (event == ftxui::Event::Character("u"))
+    else
     {
-        sorting_              = ProcessSorting::User;
-        sort_order_ascending_ = !sort_order_ascending_;
-    }
-    if (event == ftxui::Event::Character("r"))
-    {
-        sorting_              = ProcessSorting::Priority;
-        sort_order_ascending_ = !sort_order_ascending_;
-    }
-    if (event == ftxui::Event::Character("c"))
-    {
-        sorting_              = ProcessSorting::CpuPercent;
-        sort_order_ascending_ = !sort_order_ascending_;
-    }
-    if (event == ftxui::Event::Character("m"))
-    {
-        sorting_              = ProcessSorting::Memory;
-        sort_order_ascending_ = !sort_order_ascending_;
-    }
-    if (event == ftxui::Event::Character("h"))
-    {
-        sorting_              = ProcessSorting::Thread;
-        sort_order_ascending_ = !sort_order_ascending_;
-    }
-    if (event == ftxui::Event::Character("d"))
-    {
-        sorting_              = ProcessSorting::DiskUsage;
-        sort_order_ascending_ = !sort_order_ascending_;
-    }
-    if (event == ftxui::Event::Character("t"))
-    {
-        sorting_              = ProcessSorting::UpTime;
-        sort_order_ascending_ = !sort_order_ascending_;
-    }
-    if (event == ftxui::Event::Character("p"))
-    {
-        sorting_              = ProcessSorting::ProcessName;
-        sort_order_ascending_ = !sort_order_ascending_;
+        if (event.is_character() && event != ftxui::Event::Character("/"))
+        {
+            search_string_.append(ftxui::to_wstring(event.character()));
+        }
+        if (event == ftxui::Event::Backspace)
+        {
+            search_string_.pop_back();
+        }
+        if (event == ftxui::Event::Return)
+        {
+            auto it = std::find_if(current_processes_.begin(), current_processes_.end(), [this](const std::wstring& line) {
+                if (line.find(search_string_) != std::string::npos)
+                {
+                    return true;
+                }
+                return false;
+            });
+            if (it != current_processes_.end())
+            {
+                selected_ = std::distance(current_processes_.begin(), it);
+            }
+        }
     }
 
     int size  = static_cast<int>(process_count_ <= 0 ? 0 : process_count_ - 1);
