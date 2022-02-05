@@ -35,8 +35,16 @@ Press 'x' to show help.
 
 ## Build instructions:
 
-Tested with Visual Studio 2019.
+Tested with Visual Studio 2019 only (may work with mingw-gcc and Cie).
 
+### Requirements 
+
+* CMake 3+
+* Visual Studio 2019 (or build tools)
+* [NuGet](https://www.nuget.org/downloads) for getting WIL dependency, and must be in PATH.
+
+
+### 
 ```powershell
 mkdir build
 cd build
@@ -64,7 +72,7 @@ main -->-->-----UI thread ----------->------------------- Receives probes data -
 * [Catch2](https://github.com/catchorg/Catch2) for unit tests.
 
 
-## Similar projects and inspiration
+## Similar projects and inspirations
 
 * [NTop](https://github.com/gsass1/NTop) written in C.
 * [bottom](https://github.com/clementtsang/bottom) written in Rust.
