@@ -7,12 +7,7 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/microsoft/wil 
 )
 
-FetchContent_GetProperties(wil)
-if(NOT wil_POPULATED)
-  FetchContent_Populate(wil)
-  add_subdirectory(${wil_SOURCE_DIR} ${wil_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
-
+FetchContent_MakeAvailable(wil)
 # ------------------------------------------------------------------------------
 
 # probes library
